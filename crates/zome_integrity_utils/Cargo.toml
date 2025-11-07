@@ -1,0 +1,17 @@
+[package]
+name = "zome_integrity_utils"
+version = "0.1.0"
+description = "Helpers for Holochain integrity zome development."
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = [ "cdylib", "rlib" ]
+
+[lints]
+workspace = true
+
+[dependencies]
+holo_hash.workspace = true

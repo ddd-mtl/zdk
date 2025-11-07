@@ -1,23 +1,28 @@
 [workspace]
 resolver = "2"
 members = [
-  # PathExplorer Zome
   "crates/path_explorer",
   "crates/path_explorer_types",
+  "crates/zome_integrity_utils",
+  "crates/zome_signals",
+  "crates/profiles_alt_coordinator",
+  "crates/shared_ownership_integrity",
+  "crates/shared_ownership_coordinator",
+  "crates/time_indexing",
   # Playground
-  "playground/zomes/tasker_model",
-  "playground/zomes/tasker",
-  "playground/zomes/agent_directory",
-  "playground/zomes/agent_directory_integrity",
-  "playground/zomes/profiles",
-  "playground/zomes/profiles_integrity",
+#  "playground/zomes/tasker_model",
+#  "playground/zomes/tasker",
+#  "playground/zomes/agent_directory",
+#  "playground/zomes/agent_directory_integrity",
+#  "playground/zomes/profiles",
+#  "playground/zomes/profiles_integrity",
   ##"sweettest",
 ]
 
 [workspace.package]
-version = "0.1.0"
-rust-version = "1.75.0"
 edition = "2021"
+rust-version = "1.75.0"
+license = "CAL-1.0"
 
 [workspace.lints.rust]
 non_upper_case_globals = "allow"
@@ -29,8 +34,13 @@ unused_attributes = "allow"
 [workspace.dependencies]
 serde = { version = "=1.0.219", default-features = false }
 holochain_serialized_bytes = "=0.0.56"
-hdi = { version = "=0.7.0-dev.18", default-features = false }
-hdk = { version = "=0.6.0-dev.21", default-features = false }
+hdi = { version = "=0.7.0-rc.0", default-features = false }
+hdk = { version = "=0.6.0-rc.0", default-features = false }
+holo_hash = { version = "0.6.0-rc.0", features = ["encoding", "serialization"], default-features = false}
+
+
+[workspace.target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+holochain = { version = "=0.6.0-rc.0", default-features = false }
 
 
 [profile.dev]

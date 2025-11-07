@@ -1,0 +1,29 @@
+[package]
+name = "zome_utils"
+version = "0.1.0"
+description = "Helpers for Holochain coordinator zome development."
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = [ "cdylib", "rlib" ]
+
+[dependencies]
+serde.workspace = true
+hdk.workspace = true
+
+# Broken hdk deps
+#getrandom = { version = "=0.3.4", features = ["wasm_js"] }
+
+#hdk_derive = { version = "=0.4.0-dev.12", default-features = false }
+#holochain_integrity_types = "=0.4.0-dev.12"
+
+#chrono = { version = "0.4.22", default-features = false, features = ["clock", "std", "oldtime", "serde"], optional = true }
+#holochain_zome_types = { version = "=0.2.4", default-features = false }
+# Force a specific version since hdk won't compile otherwise
+#holochain_integrity_types = { version = "=0.1.1" }

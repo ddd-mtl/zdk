@@ -1,0 +1,30 @@
+[package]
+name = "sweettest_utils"
+version = "0.1.0"
+description = "Helpers for writing tests with Holochain's sweettest"
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = [ "cdylib", "rlib" ]
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+serde.workspace = true
+holochain.workspace = true
+
+colored = { version = "2.0", default-features = false }
+futures = { version = "0.3", default-features = false }
+tokio = { version = "1.0", features = [ "full" ] }
+once_cell = { version = "1.13", default-features = false }
+stream-cancel = { version = "0.8.0", default-features = false }
+
+#holochain = { version = "=0.3.2", default-features = false, features = ["test_utils"] }
+#holochain_types = { version = "=0.3.2", default-features = false }
+#holochain_zome_types = { version = "=0.3.2", default-features = false }
+#holochain_state = { version = "=0.3.2", default-features = false }
+#holo_hash = { version = "=0.3.2", default-features = false, features = ["encoding"] }

@@ -1,0 +1,23 @@
+[package]
+name = "profiles_alt_coordinator"
+version = "0.2.0"
+description = "Alternate coordinator zome for the Profiles zome."
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+hdk.workspace = true
+zome_utils.workspace = true
+zome_signals.workspace = true
+
+hc_zome_profiles_integrity = {path = "../integrity"}
+
+

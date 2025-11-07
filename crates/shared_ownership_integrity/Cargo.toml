@@ -1,0 +1,21 @@
+[package]
+name = "shared_ownership_integrity"
+version = "0.1.0"
+description = "A Holochain zome module for having multiple agents share ownership of any entry"
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+#derive_more = "0"
+#getrandom = { version = "=0.2.12", features = ["js"] }
+serde.workspace = true
+holochain_serialized_bytes.workspace = true
+hdi.workspace = true

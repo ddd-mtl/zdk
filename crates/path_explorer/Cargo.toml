@@ -1,20 +1,23 @@
 [package]
 name = "path_explorer"
-version.workspace = true
+version = "0.1.0"
+description = "A Holochain coordinator zome module for exploring all Paths available in a DHT."
+
 rust-version.workspace = true
 edition.workspace = true
-
-[lib]
-crate-type = ["cdylib", "rlib"]
+license.workspace = true
 
 [lints]
 workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 serde.workspace = true
 hdk.workspace = true
 
-zome_utils.workspace = true
-time_indexing.workspace = true
+zome_utils = {path = "../zome_utils" }
+time_indexing = {path = "../time_indexing" }
 
 path_explorer_types = {path = "../path_explorer_types" }
