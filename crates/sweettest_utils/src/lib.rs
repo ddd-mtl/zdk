@@ -1,6 +1,3 @@
-#![allow(unused_doc_comments)]
-#![allow(non_upper_case_globals)]
-
 #[cfg(not(target_arch = "wasm32"))]
 mod print;
 #[cfg(not(target_arch = "wasm32"))]

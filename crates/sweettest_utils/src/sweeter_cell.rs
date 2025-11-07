@@ -1,14 +1,12 @@
-use holochain::sweettest::{SweetCell, SweetConductor};
-
 use std::sync::Arc;
+use holochain::prelude::{AgentPubKey, AppSignal, DnaHash, Signal};
 use holochain::conductor::api::error::{ConductorApiError, ConductorApiResult};
-//use holochain_zome_types::AppSignal;
+use holochain::sweettest::{SweetCell, SweetConductor};
 use stream_cancel::{Trigger, Valve};
 
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
-use holochain_types::prelude::*;
 
 use crate::print_chain;
 

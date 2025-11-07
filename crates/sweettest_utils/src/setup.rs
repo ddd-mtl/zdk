@@ -1,6 +1,6 @@
+use holochain::prelude::AgentPubKey;
 use holochain::sweettest::*;
 use holochain::conductor::config::ConductorConfig;
-use holochain_types::prelude::AgentPubKey;
 use futures::future;
 use std::sync::Mutex;
 use once_cell::sync::Lazy;

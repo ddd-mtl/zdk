@@ -1,24 +1,23 @@
 [workspace]
 resolver = "2"
 members = [
+  "crates/agent_directory",
+  "crates/agent_directory_integrity",
   "crates/path_explorer",
   "crates/path_explorer_types",
   "crates/profiles_alt_coordinator",
   "crates/shared_ownership_integrity",
   "crates/shared_ownership_coordinator",
-  "crates/sweettest_utils",
+  #"crates/sweettest_utils",
   "crates/time_indexing",
   "crates/zome_integrity_utils",
   "crates/zome_signals",
   "crates/zome_utils",
   # Playground
-#  "playground/zomes/tasker_model",
-#  "playground/zomes/tasker",
-#  "playground/zomes/agent_directory",
-#  "playground/zomes/agent_directory_integrity",
-#  "playground/zomes/profiles",
-#  "playground/zomes/profiles_integrity",
-  ##"sweettest",
+  "playground/zomes/tasker_model",
+  "playground/zomes/tasker",
+  "playground/zomes/profiles_integrity",
+  "playground/zomes/profiles",
 ]
 
 [workspace.package]
@@ -39,7 +38,7 @@ holochain_serialized_bytes = "=0.0.56"
 hdi = { version = "=0.7.0-rc.0", default-features = false }
 hdk = { version = "=0.6.0-rc.0", default-features = false }
 holo_hash = { version = "0.6.0-rc.0", features = ["encoding", "serialization"], default-features = false}
-holochain = { version = "=0.6.0-rc.0", default-features = false }
+holochain = { version = "=0.6.0-rc.0", features = ["test_utils"]  }
 
 hc_zome_profiles_integrity = {git = "https://github.com/holochain-open-dev/profiles", branch = "main-0.6"}
 

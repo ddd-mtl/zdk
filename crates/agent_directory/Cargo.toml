@@ -1,0 +1,19 @@
+[package]
+name = "agent_directory"
+version = "2.0.0"
+description = "A Holochain zome module that registers agents to a public directory path on agent init."
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = [ "cdylib", "rlib" ]
+
+[dependencies]
+serde.workspace = true
+hdk.workspace = true
+agent_directory_integrity = { path = "../agent_directory_integrity" }
