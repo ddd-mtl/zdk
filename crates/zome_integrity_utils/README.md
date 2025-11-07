@@ -1,4 +1,4 @@
-# Zome Integrtiy Utils
+# Zome Integrity Utils
 
 Rust library of helper functions for Holochain Integrity Zome Development.
 
