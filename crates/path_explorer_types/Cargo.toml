@@ -1,0 +1,19 @@
+[package]
+name = "path_explorer_types"
+version.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+hdk.workspace = true
+
+zome_utils.workspace = true
+
+

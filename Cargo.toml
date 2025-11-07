@@ -1,0 +1,46 @@
+[workspace]
+resolver = "2"
+members = [
+  # PathExplorer Zome
+  "crates/path_explorer",
+  "crates/path_explorer_types",
+  # Playground
+  "playground/zomes/tasker_model",
+  "playground/zomes/tasker",
+  "playground/zomes/agent_directory",
+  "playground/zomes/agent_directory_integrity",
+  "playground/zomes/profiles",
+  "playground/zomes/profiles_integrity",
+  ##"sweettest",
+]
+
+[workspace.package]
+version = "0.1.0"
+rust-version = "1.75.0"
+edition = "2021"
+
+[workspace.lints.rust]
+non_upper_case_globals = "allow"
+unused_doc_comments = "allow"
+non_camel_case_types = "allow"
+non_snake_case = "allow"
+unused_attributes = "allow"
+
+[workspace.dependencies]
+serde = { version = "=1.0.219", default-features = false }
+holochain_serialized_bytes = "=0.0.56"
+hdi = { version = "=0.7.0-dev.18", default-features = false }
+hdk = { version = "=0.6.0-dev.21", default-features = false }
+
+
+[profile.dev]
+lto = false
+opt-level = 0
+overflow-checks = false
+
+[profile.release]
+opt-level = "z"
+lto = true
+
+[profile.release.build-override]
+opt-level = "z"
