@@ -1,23 +1,18 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/agent_directory",
-  "crates/agent_directory_integrity",
-  "crates/path_explorer",
-  "crates/path_explorer_types",
-  "crates/profiles_alt_coordinator",
-  "crates/shared_ownership_integrity",
-  "crates/shared_ownership_coordinator",
+  "zomes/agent_directory",
+  "zomes/agent_directory_integrity",
+  "zomes/path_explorer",
+  "zomes/path_explorer_types",
+  "zomes/profiles_alt_coordinator",
+  "zomes/shared_ownership_integrity",
+  "zomes/shared_ownership_coordinator",
   #"crates/sweettest_utils",
   "crates/time_indexing",
   "crates/zome_integrity_utils",
   "crates/zome_signals",
   "crates/zome_utils",
-  # Playground
-  "playground/zomes/tasker_model",
-  "playground/zomes/tasker",
-  "playground/zomes/profiles_integrity",
-  "playground/zomes/profiles",
 ]
 
 [workspace.package]

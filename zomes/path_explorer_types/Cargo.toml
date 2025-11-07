@@ -17,6 +17,6 @@ crate-type = ["cdylib", "rlib"]
 serde.workspace = true
 hdk.workspace = true
 
-zome_utils = {path = "../zome_utils" }
+zome_utils = {path = "../../crates/zome_utils" }
 
 
