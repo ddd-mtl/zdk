@@ -1,6 +1,6 @@
 use hdi::hash_path::path::{root_hash};
 use hdk::prelude::*;
-use zome_utils::*;
+use zome_path::*;
 use path_explorer_types::*;
 
 

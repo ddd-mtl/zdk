@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use zome_utils::*;
+use zome_path::*;
 
 /// LinkTypes to get
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]

@@ -18,7 +18,7 @@ serde.workspace = true
 holochain_serialized_bytes.workspace = true
 hdk.workspace = true
 
-zome_utils = { path = "../zome_utils" }
+zome_path = { path = "../zome_path" }
 
 #base64 = {version = "0.13"}
 chrono = { version = "0.4.22", default-features = false, features = ["clock", "std", "oldtime", "serde"] }

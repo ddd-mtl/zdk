@@ -18,6 +18,8 @@ serde.workspace = true
 hdk.workspace = true
 
 zome_utils = {path = "../../crates/zome_utils" }
-time_indexing = {path = "../../crates/time_indexing" }
+zome_path = {path = "../../crates/zome_path" }
+
+#time_indexing = {path = "../../crates/time_indexing" }
 
 path_explorer_types = {path = "../path_explorer_types" }

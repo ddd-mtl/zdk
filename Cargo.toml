@@ -13,6 +13,7 @@ members = [
   "crates/zome_integrity_utils",
   "crates/zome_signals",
   "crates/zome_utils",
+  "crates/zome_path",
 ]
 
 [workspace.package]

@@ -1,0 +1,18 @@
+[package]
+name = "zome_path"
+version = "0.1.0"
+description = "Structs and functions for advanced use of Links & Paths in Holochain Zome Developmen"
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = [ "cdylib", "rlib" ]
+
+[dependencies]
+serde.workspace = true
+hdk.workspace = true

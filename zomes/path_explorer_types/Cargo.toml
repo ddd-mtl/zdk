@@ -18,5 +18,5 @@ serde.workspace = true
 hdk.workspace = true
 
 zome_utils = {path = "../../crates/zome_utils" }
-
+zome_path = {path = "../../crates/zome_path" }
 

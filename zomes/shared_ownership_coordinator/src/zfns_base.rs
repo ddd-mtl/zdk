@@ -1,6 +1,7 @@
 use hdk::prelude::*;
 use zome_utils::*;
 use zome_signals::*;
+use zome_path::*;
 use shared_ownership_integrity::*;
 
 

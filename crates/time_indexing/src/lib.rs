@@ -1,5 +1,5 @@
 use hdk::prelude::*;
-use zome_utils::ItemLink;
+use zome_path::ItemLink;
 
 mod get_latest_time_indexed_links;
 mod sweep_interval;

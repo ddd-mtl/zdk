@@ -4,9 +4,10 @@ use hdk::prelude::*;
 /// ValidationStatus
 #[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
 pub enum ValidatedBy {
-   None,    // Untrusted, e.g. received remotely from another agent
+   None,    // Untrusted, e.g. received remotely from another agent via a signal
    Me,      // I commited the action
-   Network, // Trusted, received from DHT
+   Peer,    // There is at least one valid validation receipt and I also validated it
+   Network, // Trusted, received from DHT (enough valid validation receipts)
 }
 
 /// Bool: True if state change just happened (real-time)

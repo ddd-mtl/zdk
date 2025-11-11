@@ -16,8 +16,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde.workspace = true
 hdk.workspace = true
+
 zome_utils = {path = "../../crates/zome_utils" }
 zome_signals = {path = "../../crates/zome_signals" }
+zome_path = {path = "../../crates/zome_path" }
 
 shared_ownership_integrity = {path = "../shared_ownership_integrity" }
 

@@ -2,8 +2,7 @@
 use chrono::{DateTime, Datelike, NaiveDateTime, Timelike, Utc, NaiveDate};
 use hdk::prelude::*;
 use hdi::hash_path::path::{Component, TypedPath};
-use zome_utils::*;
-
+use zome_path::*;
 
 ///
 pub fn get_component_from_link_tag(link: &Link) -> Result<Component, SerializedBytesError> {

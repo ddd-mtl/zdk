@@ -7,7 +7,7 @@ use zome_utils::*;
 //--------------------------------------------------------------------------------------------------
 
 use hdk::prelude::*;
-//use zome_utils::*;
+use zome_path::*;
 
 
 /// Only gives values for current integrity zome.

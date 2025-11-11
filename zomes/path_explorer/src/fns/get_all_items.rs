@@ -1,6 +1,7 @@
 use hdk::prelude::*;
 use hdk::prelude::holo_hash::{AnyLinkableHashB64};
 use zome_utils::*;
+use zome_path::*;
 use path_explorer_types::*;
 
 

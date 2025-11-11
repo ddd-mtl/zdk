@@ -3,7 +3,7 @@ use hdk::{
 };
 use std::cmp;
 use hdi::hash_path::path::Component;
-use zome_utils::*;
+use zome_path::*;
 
 use crate::*;
 use crate::timepath_utils::*;
@@ -44,13 +44,11 @@ pub fn get_latest_time_indexed_links(
   /// Grab links from latest time-index hour
   if latest_hour_tp.exists()? {
     let latest_hour_us = convert_timepath_to_timestamp(latest_hour_tp.path.clone())?;
-    let last_hour_links = get_links(link_input(
-      latest_hour_tp.path_entry_hash()?,
-      LinkTypeFilter::single_dep(root_anchor_tp.link_type.zome_index),
-      //LinkTypeFilter::single_type(root_tp.link_type.zome_index, root_tp.link_type.zome_type),
-      //ThreadsLinkType::Protocols.try_into_filter()?,
-      link_tag.clone(),
-    ), GetStrategy::Network)?;
+     let mut lquery = LinkQuery::new(
+        latest_hour_tp.path_entry_hash()?,
+        LinkTypeFilter::single_dep(root_anchor_tp.link_type.zome_index));
+     lquery.tag_prefix = link_tag.clone();
+    let last_hour_links = get_links(lquery, GetStrategy::Network)?;
     debug!("latest_hour_tp items: {}", last_hour_links.len());
     let mut last_hour_pairs = last_hour_links.into_iter()
       .map(|link| (latest_hour_us.clone(), link))
@@ -62,11 +60,11 @@ pub fn get_latest_time_indexed_links(
     if total_items.len() >= items_limit {
       has_probed_prev = true;
       if prev_hour_tp.exists()? {
-        let prev_hour_links = get_links(link_input(
-          prev_hour_tp.path_entry_hash()?,
-          LinkTypeFilter::single_dep(root_anchor_tp.link_type.zome_index),
-          link_tag.clone(),
-        ), GetStrategy::Network)?;
+         let mut lquery = LinkQuery::new(
+            prev_hour_tp.path_entry_hash()?,
+            LinkTypeFilter::single_dep(root_anchor_tp.link_type.zome_index));
+         lquery.tag_prefix = link_tag.clone();
+        let prev_hour_links = get_links(lquery, GetStrategy::Network)?;
         debug!("prev_hour_tp items: {}", prev_hour_links.len());
         let mut prev_hour_pairs = prev_hour_links.into_iter()
                                                  .map(|link| (prev_hour_us.clone(), link))
@@ -205,11 +203,9 @@ fn sweep_and_append(
   for (parent_tp, compi32, child_link) in children {
     if depth == 0 {
       /// Grab all children items at the hour level
-      let links = get_links(link_input(
-        child_link.target.clone(),
-        time_link_type.try_into_filter()?,
-        link_tag.clone(),
-      ), GetStrategy::Network)?;
+      let mut lquery = LinkQuery::new(child_link.target, time_link_type.try_into_filter()?);
+      lquery.tag_prefix = link_tag.clone();
+      let links = get_links(lquery, GetStrategy::Network)?;
       //debug!(" - get_links() of parent {}.{} : {} found", timepath2anchor(&parent_tp), compi32, links.len()/*, child_link.target*/);
       /// Form leaf path
       let mut leaf_tp = parent_tp.clone();
