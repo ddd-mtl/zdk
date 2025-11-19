@@ -1,4 +1,5 @@
-mod common_zfns;
 mod fns;
 
 pub use fns::*;
+
+extern crate zome_core;

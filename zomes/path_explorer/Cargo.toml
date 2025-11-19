@@ -17,9 +17,12 @@ crate-type = ["cdylib", "rlib"]
 serde.workspace = true
 hdk.workspace = true
 
-zome_utils = {path = "../../crates/zome_utils" }
-zome_path = {path = "../../crates/zome_path" }
+zome_utils = { path = "../../crates/zome_utils" }
+zome_path = { path = "../../crates/zome_path" }
+
+zome_core = { path = "../zome_core" }
 
 #time_indexing = {path = "../../crates/time_indexing" }
 
-path_explorer_types = {path = "../path_explorer_types" }
+path_explorer_types = { path = "../path_explorer_types" }
+

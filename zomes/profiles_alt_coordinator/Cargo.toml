@@ -17,8 +17,9 @@ crate-type = ["cdylib", "rlib"]
 hdk.workspace = true
 hc_zome_profiles_integrity.workspace = true
 
-zome_utils = {path = "../../crates/zome_utils" }
-zome_signals = {path = "../../crates/zome_signals" }
+zome_utils = { path = "../../crates/zome_utils" }
+zome_signals = { path = "../../crates/zome_signals" }
+zome_core = { path = "../zome_core" }
 
 
 

@@ -11,9 +11,9 @@ license.workspace = true
 workspace = true
 
 [lib]
-crate-type = [ "cdylib", "rlib" ]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-serde.workspace = true
 hdk.workspace = true
 agent_directory_integrity = { path = "../agent_directory_integrity" }
+zome_core = { path = "../zome_core" }
