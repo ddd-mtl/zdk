@@ -10,6 +10,7 @@ use zome_utils::*;
 pub struct PublishOwnershipInput {
    pub shared_ah: ActionHash,
    pub non_author: Option<(AgentPubKey, Signature)>, // if no signature then caller must be author
+   pub get_strategy: GetStrategy,
 }
 
 /// Return (SharedLinkAh, OwnerLinkAh)
@@ -20,7 +21,7 @@ pub fn publish_ownership(input: PublishOwnershipInput) -> ExternResult<(ActionHa
    /// Get owner proof
    let mut maybe_owner_link_ah = None;
    let (agent, signature) = if let Some((agent, signed)) = input.non_author.clone() {
-      let owners = probe_owners(input.shared_ah.clone())?;
+      let owners = probe_owners(input.shared_ah.clone(), input.get_strategy)?;
       let Some(pair) = owners.iter().filter(|&(owner, _link_ah)| owner == &agent).next() else {
          return zome_error!("Agent is not an owner of shared entry");
       };
@@ -71,13 +72,13 @@ pub fn publish_ownership(input: PublishOwnershipInput) -> ExternResult<(ActionHa
 
 ///
 #[hdk_extern]
-pub fn probe_shareds(_: ()) -> ExternResult<Vec<ActionHash>> {
+pub fn probe_shareds(strategy: GetStrategy) -> ExternResult<Vec<ActionHash>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let root_path = Path::from(ROOT_ANCHOR_SHAREDS).typed(SharedOwnershipLinkType::SharedPath)?;
    let ph = root_path.path_entry_hash()?;
    let links = get_links(
       LinkQuery::new(ph, SharedOwnershipLinkType::SharedEntry.try_into_filter().unwrap()),
-      GetStrategy::Network,
+      strategy,
    )?;
    /// Emit signal
    attest_links(links.clone())?;
@@ -91,11 +92,23 @@ pub fn probe_shareds(_: ()) -> ExternResult<Vec<ActionHash>> {
 
 ///
 #[hdk_extern]
-pub fn probe_owners(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
+pub fn probe_owners_network(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
+   probe_owners(shared_ah, GetStrategy::Network)
+}
+
+///
+#[hdk_extern]
+pub fn probe_owners_local(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   probe_owners(shared_ah, GetStrategy::Local)
+}
+
+///
+pub fn probe_owners(shared_ah: ActionHash, strategy: GetStrategy) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
    let links = get_links(
       LinkQuery::new(shared_ah, SharedOwnershipLinkType::Owner.try_into_filter().unwrap()),
-      GetStrategy::Network,
+      strategy,
    )?;
    let pairs = links
       .into_iter()

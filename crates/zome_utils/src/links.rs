@@ -93,8 +93,11 @@ fn links_to_GetInputs(links: Vec<Link>, maybe_filter: Option<AnyLinkable>) -> Ve
 // }
 
 ///
-pub fn get_typed_from_links<R: TryFrom<Entry>>(input: LinkQuery) -> ExternResult<Vec<(R, Link)>> {
-   let links = get_links(input, GetStrategy::Network)?;
+pub fn get_typed_from_links<R: TryFrom<Entry>>(
+   query: LinkQuery,
+   strategy: GetStrategy,
+) -> ExternResult<Vec<(R, Link)>> {
+   let links = get_links(query, strategy)?;
    //debug!("get_typed_from_links() links found: {}", links.len());
    let input_pairs = links_to_GetInputs(links, None);
    //debug!("get_typed_from_links() input_pairs: {}", input_pairs.len());
@@ -115,9 +118,10 @@ pub fn get_typed_from_links<R: TryFrom<Entry>>(input: LinkQuery) -> ExternResult
 
 /// Returns Vec of: CreateLinkHash, LinkTarget, LinkAuthor, TypedEntry
 pub fn get_typed_from_actions_links<T: TryFrom<Entry>>(
-   input: LinkQuery,
+   query: LinkQuery,
+   strategy: GetStrategy,
 ) -> ExternResult<Vec<(ActionHash, AnyLinkableHash, AgentPubKey, T)>> {
-   let links = get_links(input, GetStrategy::Network)?;
+   let links = get_links(query, strategy)?;
    //debug!("get_typed_from_actions_links() links found: {}", links.len());
    let input_pairs = links_to_GetInputs(links, Some(AnyLinkable::Action));
    //debug!("get_typed_from_actions_links() input_pairs: {}", input_pairs.len());

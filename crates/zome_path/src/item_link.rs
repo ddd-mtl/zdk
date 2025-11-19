@@ -27,6 +27,7 @@ pub fn get_itemlinks(
    path: Path,
    link_filter: LinkTypeFilter,
    link_tag: Option<LinkTag>,
+   strategy: GetStrategy,
 ) -> ExternResult<Vec<ItemLink>> {
    /// Grab Links
    let links = get_links(
@@ -38,7 +39,7 @@ pub fn get_itemlinks(
          after: None,
          author: None,
       },
-      GetStrategy::Network,
+      strategy,
    )?;
    /// Convert to ItemLinks
    let res = links.into_iter().map(|link| ItemLink::from(link)).collect();

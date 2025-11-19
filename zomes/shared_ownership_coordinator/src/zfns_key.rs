@@ -116,7 +116,7 @@ pub fn request_shared_key(input: RequestKeyInput) -> ExternResult<()> {
    let agent = if let Some(agent) = input.maybe_agent {
       agent
    } else {
-      let owners = probe_owners(input.shared_ah)?;
+      let owners = probe_owners(input.shared_ah, GetStrategy::Network)?;
       if owners.is_empty() {
          return zome_error!("No owners found for shared key");
       }

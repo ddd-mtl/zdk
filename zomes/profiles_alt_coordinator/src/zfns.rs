@@ -140,7 +140,7 @@ pub fn find_latest_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<(P
 /// Gets all the agents that have created a profile in this DHT.
 #[hdk_extern]
 #[feature(zits_blocking)]
-pub fn probe_profiles(_: ()) -> ExternResult<()> {
+pub fn probe_profiles(strategy: GetStrategy) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let path = Path::from("all_profiles").typed(LinkTypes::PrefixPath)?;
    let children = path.children_paths()?;
@@ -152,6 +152,7 @@ pub fn probe_profiles(_: ()) -> ExternResult<()> {
             LinkTypes::PathToAgent.try_into_filter()?,
          )
          .unwrap()
+         .get_options(strategy)
          .build())
       })
       .collect::<ExternResult<Vec<GetLinksInput>>>()?;

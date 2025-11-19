@@ -28,10 +28,14 @@ pub fn all_dna_link_types() -> LinkTypeFilter {
 }
 
 /// Return all children of any link-type
-pub fn get_any_children(parent_path: Path, link_tag: Option<LinkTag>) -> ExternResult<Vec<Link>> {
+pub fn get_any_children(
+   parent_path: Path,
+   link_tag: Option<LinkTag>,
+   strategy: GetStrategy,
+) -> ExternResult<Vec<Link>> {
    let mut children = get_links(
       link_input(parent_path.path_entry_hash()?, all_dna_link_types(), link_tag),
-      GetStrategy::Network,
+      strategy,
    )?;
    /// Only need one of each hash.
    children.sort_unstable_by(|a, b| a.tag.cmp(&b.tag));
@@ -40,7 +44,7 @@ pub fn get_any_children(parent_path: Path, link_tag: Option<LinkTag>) -> ExternR
 }
 
 /// Calls `get_itemlinks()` and all dna link_types
-pub fn get_all_itemlinks(path: Path, link_tag: Option<LinkTag>) -> ExternResult<Vec<ItemLink>> {
-   let res = get_itemlinks(path, all_dna_link_types(), link_tag.clone())?;
+pub fn get_all_itemlinks(path: Path, link_tag: Option<LinkTag>, strategy: GetStrategy) -> ExternResult<Vec<ItemLink>> {
+   let res = get_itemlinks(path, all_dna_link_types(), link_tag.clone(), strategy)?;
    Ok(res)
 }

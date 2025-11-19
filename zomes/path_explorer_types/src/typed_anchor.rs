@@ -54,21 +54,24 @@ impl TypedAnchor {
    }
 
    ///
-   pub fn children(&self) -> ExternResult<Vec<TypedPath>> {
+   pub fn children(&self, strategy: GetStrategy) -> ExternResult<Vec<TypedPath>> {
       let tp = self.as_path();
-      let subs = tp_children_paths(&tp)?;
+      let subs = tp_children_paths(&tp, strategy)?;
       Ok(subs)
    }
 
    ///
-   pub fn is_leaf(&self) -> bool {
-      return self.children().expect("Failed to get Anchor children").is_empty();
+   pub fn is_leaf(&self, strategy: GetStrategy) -> bool {
+      return self
+         .children(strategy)
+         .expect("Failed to get Anchor children")
+         .is_empty();
    }
 
    /// Return all LeafAnchors from this Anchor
-   /// USE WITH CARE as this can easily timeout as it's a recursive loop of get_links()
-   pub fn walk(&self) -> ExternResult<Vec<TypedAnchor>> {
-      let res_tps = tp_leaf_children(&self.as_path())?;
+   /// USE WITH CARE as this can easily time out as it's a recursive loop of get_links()
+   pub fn walk(&self, strategy: GetStrategy) -> ExternResult<Vec<TypedAnchor>> {
+      let res_tps = tp_leaf_children(&self.as_path(), strategy)?;
       //debug!("TypedAnchor.probe_leaf_anchors() '{}' has {} children.", self.anchor, res_tps.len());
       let res = res_tps
          .into_iter()
@@ -78,15 +81,20 @@ impl TypedAnchor {
    }
 
    /// Return all Items hanging off this Anchor according to tag
-   pub fn get_all_items(&self, link_tag: Option<LinkTag>) -> ExternResult<Vec<ItemLink>> {
+   pub fn get_all_items(&self, link_tag: Option<LinkTag>, strategy: GetStrategy) -> ExternResult<Vec<ItemLink>> {
       let tp = self.as_path();
-      return get_all_itemlinks(tp.path, link_tag);
+      return get_all_itemlinks(tp.path, link_tag, strategy);
    }
 
    /// Return Items hanging off this Anchor according to filter and tag
-   pub fn get_items(&self, link_filter: LinkTypeFilter, link_tag: Option<LinkTag>) -> ExternResult<Vec<ItemLink>> {
+   pub fn get_items(
+      &self,
+      link_filter: LinkTypeFilter,
+      link_tag: Option<LinkTag>,
+      strategy: GetStrategy,
+   ) -> ExternResult<Vec<ItemLink>> {
       let tp = self.as_path();
-      return get_itemlinks(tp.path, link_filter, link_tag);
+      return get_itemlinks(tp.path, link_filter, link_tag, strategy);
    }
 }
 

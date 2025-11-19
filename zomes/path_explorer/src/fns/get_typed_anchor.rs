@@ -3,11 +3,27 @@ use hdi::hash_path::path::Component;
 use hdk::prelude::holo_hash::EntryHashB64;
 use hdk::prelude::*;
 use path_explorer_types::*;
+use zome_utils::zome_panic_hook;
 
 /// Determine TypedAnchor from anchor, by looking for parent
 /// Return EntryHash of anchor if no parents found
 #[hdk_extern]
-pub fn get_typed_anchor(anchor: String) -> ExternResult<(EntryHashB64, Option<TypedAnchor>)> {
+pub fn get_typed_anchor_network(anchor: String) -> ExternResult<(EntryHashB64, Option<TypedAnchor>)> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   return get_typed_anchor(anchor, GetStrategy::Network);
+}
+
+/// Determine TypedAnchor from anchor, by looking for parent
+/// Return EntryHash of anchor if no parents found
+#[hdk_extern]
+pub fn get_typed_anchor_local(anchor: String) -> ExternResult<(EntryHashB64, Option<TypedAnchor>)> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   return get_typed_anchor(anchor, GetStrategy::Local);
+}
+
+/// Determine TypedAnchor from anchor, by looking for parent
+/// Return EntryHash of anchor if no parents found
+pub fn get_typed_anchor(anchor: String, strategy: GetStrategy) -> ExternResult<(EntryHashB64, Option<TypedAnchor>)> {
    let path = Path::from(anchor.clone());
    let path_eh = path.path_entry_hash()?;
    let path_hash = AnyLinkableHash::from(path_eh.clone());
@@ -26,7 +42,7 @@ pub fn get_typed_anchor(anchor: String) -> ExternResult<(EntryHashB64, Option<Ty
 
    /// Check for parent's children and match which fn argument to get link info
    if let Some(parent_path) = maybe_parent_path {
-      let child_links = get_any_children(parent_path, None)?;
+      let child_links = get_any_children(parent_path, None, strategy)?;
       debug!("child_links: {:?}", child_links);
       for link in child_links {
          if link.target == path_hash {
@@ -40,7 +56,7 @@ pub fn get_typed_anchor(anchor: String) -> ExternResult<(EntryHashB64, Option<Ty
       }
       debug!("no match found");
    } else {
-      let root_anchors = get_all_root_anchors(())?;
+      let root_anchors = get_all_root_anchors(strategy)?;
       debug!("root_anchors: {:?}", root_anchors);
       for root_anchor in root_anchors {
          if root_anchor.anchor == anchor {

@@ -29,6 +29,7 @@ pub struct GetItemsInput {
    pub anchor: String, // We don't need a typedAnchor here since we care only about the ItemLink type and not the Anchor type
    pub link_filter: MyLinkFilter, //TODO: Change type ro LinkTypeFilter once holochain-client-js defines it.
    pub link_tag: Option<LinkTag>,
+   pub strategy: GetStrategy,
 }
 
 ///
@@ -39,6 +40,7 @@ pub fn get_items(input: GetItemsInput) -> ExternResult<Vec<ItemLink>> {
       path,
       input.link_filter.try_into_filter()?,
       input.link_tag.map(|a| LinkTag::from(a.clone())),
+      input.strategy,
    )?;
    Ok(res)
 }

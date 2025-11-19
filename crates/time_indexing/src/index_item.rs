@@ -1,5 +1,4 @@
 use crate::*;
-use hdk::prelude::*;
 
 /// Index an Item according to given time and root TypedPath
 /// Returns the LeafAnchor and ActionHash of the created link
