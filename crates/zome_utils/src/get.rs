@@ -9,8 +9,8 @@ pub type TypedEntryAndHash<T> = (T, ActionHash, EntryHash);
 pub type OptionTypedEntryAndHash<T> = Option<TypedEntryAndHash<T>>;
 
 /// Get Record from AnyDhtHash
-pub fn get_record(dh: AnyDhtHash) -> ExternResult<Record> {
-   let maybe_record = get(dh.clone(), GetOptions::network())?;
+pub fn get_record(dh: AnyDhtHash, strategy: GetStrategy) -> ExternResult<Record> {
+   let maybe_record = get(dh.clone(), strategy.into())?;
    let Some(record) = maybe_record else {
       return zome_error!("{}", format!("No Record found at given hash {}", dh));
    };
@@ -18,8 +18,8 @@ pub fn get_record(dh: AnyDhtHash) -> ExternResult<Record> {
 }
 
 /// Get untyped entry from eh
-pub fn get_entry(dh: AnyDhtHash) -> ExternResult<Entry> {
-   let record = get_record(dh)?;
+pub fn get_entry(dh: AnyDhtHash, strategy: GetStrategy) -> ExternResult<Entry> {
+   let record = get_record(dh, strategy.into())?;
    let RecordEntry::Present(entry) = record.entry() else {
       return zome_error!(
          "{}",
@@ -30,8 +30,8 @@ pub fn get_entry(dh: AnyDhtHash) -> ExternResult<Entry> {
 }
 
 /// Get untyped entry from eh
-pub fn get_entry_from_eh(eh: EntryHash) -> ExternResult<Entry> {
-   let record = get_record(AnyDhtHash::from(eh))?;
+pub fn get_entry_from_eh(eh: EntryHash, strategy: GetStrategy) -> ExternResult<Entry> {
+   let record = get_record(AnyDhtHash::from(eh), strategy.into())?;
    let RecordEntry::Present(entry) = record.entry() else {
       return zome_error!(
          "{}",
@@ -42,8 +42,8 @@ pub fn get_entry_from_eh(eh: EntryHash) -> ExternResult<Entry> {
 }
 
 /// Get EntryHash from a ActionHash
-pub fn get_eh(ah: ActionHash) -> ExternResult<EntryHash> {
-   let record = get_record(AnyDhtHash::from(ah))?;
+pub fn get_eh(ah: ActionHash, strategy: GetStrategy) -> ExternResult<EntryHash> {
+   let record = get_record(AnyDhtHash::from(ah), strategy.into())?;
    let Some(eh) = record.action().entry_hash() else {
       return zome_error!(
          "{}",
@@ -55,8 +55,8 @@ pub fn get_eh(ah: ActionHash) -> ExternResult<EntryHash> {
 
 /// Get author from AnyDhtHash
 /// Must be a single author entry type
-pub fn get_author(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
-   let record = get_record(dh)?;
+pub fn get_author(dh: AnyDhtHash, strategy: GetStrategy) -> ExternResult<AgentPubKey> {
+   let record = get_record(dh, strategy.into())?;
    let author = record.action().author();
    Ok(author.to_owned())
 }
@@ -77,14 +77,14 @@ pub fn get_typed_from_record<T: TryFrom<Entry>>(record: Record) -> ExternResult<
 }
 
 /// Get EntryHash and typed Entry from an EntryHash
-pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash) -> ExternResult<T> {
-   let record = get_record(AnyDhtHash::from(eh))?;
+pub fn get_typed_from_eh<T: TryFrom<Entry>>(eh: EntryHash, strategy: GetStrategy) -> ExternResult<T> {
+   let record = get_record(AnyDhtHash::from(eh), strategy.into())?;
    Ok(get_typed_from_record(record)?)
 }
 
 /// Get typed Entry from an ActionHash
-pub fn get_typed_from_ah<T: TryFrom<Entry>>(ah: ActionHash) -> ExternResult<(EntryHash, T)> {
-   let record = get_record(AnyDhtHash::from(ah))?;
+pub fn get_typed_from_ah<T: TryFrom<Entry>>(ah: ActionHash, strategy: GetStrategy) -> ExternResult<(EntryHash, T)> {
+   let record = get_record(AnyDhtHash::from(ah), strategy.into())?;
    let Some(eh) = record.action().entry_hash() else {
       return zome_error!(
          "{}",
@@ -96,29 +96,39 @@ pub fn get_typed_from_ah<T: TryFrom<Entry>>(ah: ActionHash) -> ExternResult<(Ent
 
 /// Get typed Entry from AnyLinkableHash
 /// Must be a single author entry type
-pub fn get_typed_and_record<T: TryFrom<Entry>>(lh: AnyLinkableHash) -> ExternResult<(Record, T)> {
+pub fn get_typed_and_record<T: TryFrom<Entry>>(
+   lh: AnyLinkableHash,
+   strategy: GetStrategy,
+) -> ExternResult<(Record, T)> {
    let dh = into_dht_hash(lh)?;
-   let record = get_record(dh)?;
+   let record = get_record(dh, strategy.into())?;
    let typed = get_typed_from_record::<T>(record.clone())?;
    Ok((record, typed))
 }
 
 /// Get typed Entry and its author from AnyLinkableHash
 /// Must be a single author entry type
-pub fn get_typed_and_author<T: TryFrom<Entry>>(lh: AnyLinkableHash) -> ExternResult<(AgentPubKey, T)> {
+pub fn get_typed_and_author<T: TryFrom<Entry>>(
+   lh: AnyLinkableHash,
+   strategy: GetStrategy,
+) -> ExternResult<(AgentPubKey, T)> {
    let dh = into_dht_hash(lh)?;
-   let record = get_record(dh)?;
+   let record = get_record(dh, strategy.into())?;
    let author = record.action().author();
    let app_entry = get_typed_from_record::<T>(record.clone())?;
    Ok((author.clone(), app_entry))
 }
 
 ///
-pub fn get_app_entry_name(dh: AnyDhtHash, cell_target: CallTargetCell) -> ExternResult<(AppEntryName, Entry)> {
+pub fn get_app_entry_name(
+   dh: AnyDhtHash,
+   cell_target: CallTargetCell,
+   strategy: GetStrategy,
+) -> ExternResult<(AppEntryName, Entry)> {
    /// Grab Entry
-   let entry = get_entry(dh.clone())?;
+   let entry = get_entry(dh.clone(), strategy.into())?;
    /// Grab Type
-   let entry_type = get_entry_type(&entry)?;
+   let entry_type = get_entry_type(&entry, strategy.into())?;
    let EntryType::App(app_entry_def) = entry_type else {
       return zome_error!("{}", format!("No AppEntry found at given hash {}", dh));
    };
@@ -198,8 +208,8 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
 }
 
 ///
-pub fn get_latest_entry(target: EntryHash, option: GetOptions) -> ExternResult<Option<Entry>> {
-   let details = get_details(target, option.clone())?;
+pub fn get_latest_entry(target: EntryHash) -> ExternResult<Option<Entry>> {
+   let details = get_details(target, GetOptions::network())?;
    let Some(Details::Entry(EntryDetails { entry, updates, .. })) = details else {
       return Ok(None);
    };
@@ -222,14 +232,14 @@ pub fn get_latest_entry(target: EntryHash, option: GetOptions) -> ExternResult<O
       })
       .expect("updates are not empty");
    let eh = sah.action().entry_hash().unwrap();
-   let record = get_record(AnyDhtHash::from(eh.to_owned()))?;
+   let record = get_record(AnyDhtHash::from(eh.to_owned()), GetStrategy::Network)?;
    Ok(record.entry.into_option())
 }
 
 /// Recursively call get_details() until no updates are found
 /// If multiple updates are found. It will take the last one in the list.
 pub fn get_latest_record(ah: ActionHash) -> ExternResult<Record> {
-   let Some(details) = get_details(ah.clone(), GetOptions::default())? else {
+   let Some(details) = get_details(ah.clone(), GetOptions::network())? else {
       return zome_error!("{}", format!("Record not found at hash {}", ah));
    };
    match details {
@@ -250,7 +260,7 @@ pub fn get_latest_record(ah: ActionHash) -> ExternResult<Record> {
 }
 
 /// Get EntryType of an Entry
-pub fn get_entry_type(entry: &Entry) -> ExternResult<EntryType> {
+pub fn get_entry_type(entry: &Entry, strategy: GetStrategy) -> ExternResult<EntryType> {
    let entry_type = match entry {
       Entry::CounterSign(_data, _bytes) => unreachable!("CounterSign"),
       Entry::Agent(_agent_hash) => EntryType::AgentPubKey,
@@ -258,15 +268,15 @@ pub fn get_entry_type(entry: &Entry) -> ExternResult<EntryType> {
       Entry::CapGrant(_grant) => EntryType::CapGrant,
       Entry::App(_entry_bytes) => {
          let eh = hash_entry(entry.clone())?;
-         get_entry_type_at(eh.into())?
+         get_entry_type_at(eh.into(), strategy.into())?
       },
    };
    Ok(entry_type)
 }
 
 /// Get EntryType at address
-pub fn get_entry_type_at(dh: AnyDhtHash) -> ExternResult<EntryType> {
-   let record = get_record(dh)?;
+pub fn get_entry_type_at(dh: AnyDhtHash, strategy: GetStrategy) -> ExternResult<EntryType> {
+   let record = get_record(dh, strategy.into())?;
    let Some(entry_type) = record.action().entry_type() else {
       return zome_error!("{}", format!("No Entry at given hash {}", record.action_address()));
    };
@@ -275,11 +285,11 @@ pub fn get_entry_type_at(dh: AnyDhtHash) -> ExternResult<EntryType> {
 }
 
 ///
-pub fn get_linkable_type(hash: AnyLinkableHash) -> ExternResult<String> {
+pub fn get_linkable_type(hash: AnyLinkableHash, strategy: GetStrategy) -> ExternResult<String> {
    let Some(dht) = hash.into_any_dht_hash() else {
       return Ok("External".to_owned());
    };
-   let maybe_record = get(dht.clone(), GetOptions::network())?;
+   let maybe_record = get(dht.clone(), strategy.into())?;
    let Some(record) = maybe_record else {
       return zome_error!("{}", format!("No Record at given hash {}", dht));
    };

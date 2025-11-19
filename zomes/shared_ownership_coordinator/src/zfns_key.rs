@@ -23,7 +23,7 @@ where
    /// Serialize
    let data: XSalsa20Poly1305Data = bincode::serialize(&data).unwrap().into();
    /// Get Key
-   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone())?;
+   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone(), GetStrategy::Network)?;
    /// Encrypt
    let enc_data = x_salsa20_poly1305_encrypt(key.key_ref, data)?;
    Ok(enc_data)
@@ -35,7 +35,7 @@ where
    T: for<'a> serde::Deserialize<'a> + Clone + Sized + std::fmt::Debug,
 {
    /// Get Key
-   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone())?;
+   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone(), GetStrategy::Network)?;
    /// Encrypt
    let Some(ser_data) = x_salsa20_poly1305_decrypt(key.key_ref, enc_data)? else {
       return zome_error!("Failed to decrypt data");
@@ -57,7 +57,7 @@ pub struct SendKeyInput {
 #[hdk_extern]
 #[feature(zits_blocking)]
 pub fn send_shared_key(input: SendKeyInput) -> ExternResult<()> {
-   let (_eh, key) = get_typed_from_ah::<SharedKey>(input.key_ah.clone())?;
+   let (_eh, key) = get_typed_from_ah::<SharedKey>(input.key_ah.clone(), GetStrategy::Network)?;
    let send = RecvKeyInput {
       key_ah: input.key_ah,
       key,

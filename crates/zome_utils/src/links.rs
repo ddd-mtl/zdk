@@ -127,7 +127,7 @@ pub fn get_typed_from_actions_links<T: TryFrom<Entry>>(
    //debug!("get_typed_from_actions_links() input_pairs: {}", input_pairs.len());
    let mut tuples: Vec<(ActionHash, AnyLinkableHash, AgentPubKey, T)> = Vec::new();
    for (_input, link) in input_pairs.into_iter() {
-      let Ok(p) = zome_utils::get_typed_and_author::<T>(link.target.clone()) else {
+      let Ok(p) = zome_utils::get_typed_and_author::<T>(link.target.clone(), strategy) else {
          continue;
       };
       tuples.push((link.create_link_hash, link.target, p.0, p.1));

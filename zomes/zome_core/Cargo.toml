@@ -1,0 +1,21 @@
+[package]
+name = "zome_core"
+version = "0.1.0"
+description = "A Holochain zome module with essential zome functions for any zome"
+
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lints]
+workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+hdk.workspace = true
+
+zome_utils = { path = "../../crates/zome_utils" }
+
+
