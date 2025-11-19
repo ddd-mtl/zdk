@@ -27,6 +27,38 @@ fn get_record_author_network(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
    return zome_utils::get_author(dh, GetStrategy::Network);
 }
 
+///
+#[hdk_extern]
+pub fn get_record_local(hash: AnyDhtHash) -> ExternResult<Option<Record>> {
+   let maybe_record = get(hash.clone(), GetOptions::local())?;
+   Ok(maybe_record)
+}
+
+///
+#[hdk_extern]
+pub fn get_record_network(hash: AnyDhtHash) -> ExternResult<Option<Record>> {
+   let maybe_record = get(hash.clone(), GetOptions::network())?;
+   Ok(maybe_record)
+}
+
+///
+#[hdk_extern]
+pub fn get_ah_local(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
+   debug!("get_ah() {}", eh);
+   let maybe_record = get(eh, GetOptions::local())?;
+   let Some(record) = maybe_record else { return Ok(None) };
+   Ok(Some(record.action_address().to_owned()))
+}
+
+///
+#[hdk_extern]
+pub fn get_ah_network(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
+   debug!("get_ah() {}", eh);
+   let maybe_record = get(eh, GetOptions::network())?;
+   let Some(record) = maybe_record else { return Ok(None) };
+   Ok(Some(record.action_address().to_owned()))
+}
+
 #[derive(Serialize, Deserialize, SerializedBytes, Debug)]
 pub struct GetDataTypeInput {
    hash: AnyDhtHash,
@@ -35,7 +67,7 @@ pub struct GetDataTypeInput {
    get_strategy: GetStrategy,
 }
 
-/// Return AppEntryName or data type name of data at hash in role or dna
+/// Return AppEntryName or data type name of data at hash in the role or dna
 #[hdk_extern]
 fn get_data_type(input: GetDataTypeInput) -> ExternResult<String> {
    let target_cell = if let Some(role) = input.role {
