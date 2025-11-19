@@ -37,9 +37,21 @@ pub fn synchronize_tip(input: SynchronizeTipInput) -> ExternResult<()> {
          return Err(wasm_error!("recv_remote_signal() failed during synchronize_tip()"));
       },
       Ok(ZomeCallResponse::Ok(_)) => Ok(()),
-      Ok(ZomeCallResponse::AuthenticationFailed(_sign, apk)) => Err(wasm_error!("recv_remote_signal() call failed: AuthenticationFailed - {:?}", apk)),
-      Ok(ZomeCallResponse::Unauthorized(auth, _, _, fn_name)) => Err(wasm_error!("recv_remote_signal() call failed: Unauthorized call to {}(): {:?}", fn_name, auth)),
-      Ok(ZomeCallResponse::NetworkError(e)) => Err(wasm_error!("recv_remote_signal() call failed: NetworkError: {:?}", e)),
-      Ok(ZomeCallResponse::CountersigningSession(e)) => Err(wasm_error!("recv_remote_signal() call failed: CountersigningSession: {:?}", e)),
+      Ok(ZomeCallResponse::AuthenticationFailed(_sign, apk)) => Err(wasm_error!(
+         "recv_remote_signal() call failed: AuthenticationFailed - {:?}",
+         apk
+      )),
+      Ok(ZomeCallResponse::Unauthorized(auth, _, _, fn_name)) => Err(wasm_error!(
+         "recv_remote_signal() call failed: Unauthorized call to {}(): {:?}",
+         fn_name,
+         auth
+      )),
+      Ok(ZomeCallResponse::NetworkError(e)) => {
+         Err(wasm_error!("recv_remote_signal() call failed: NetworkError: {:?}", e))
+      },
+      Ok(ZomeCallResponse::CountersigningSession(e)) => Err(wasm_error!(
+         "recv_remote_signal() call failed: CountersigningSession: {:?}",
+         e
+      )),
    }
 }

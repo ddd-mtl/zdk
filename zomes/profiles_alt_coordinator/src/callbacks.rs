@@ -1,8 +1,7 @@
-use hdk::prelude::*;
-use zome_utils::*;
-use zome_signals::*;
 use hc_zome_profiles_integrity::*;
-
+use hdk::prelude::*;
+use zome_signals::*;
+use zome_utils::*;
 
 ///
 #[hdk_extern]
@@ -11,12 +10,14 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
    Ok(InitCallbackResult::Pass)
 }
 
-
 ///
 #[hdk_extern(infallible)]
 pub fn post_commit(signed_actions: Vec<SignedActionHashed>) {
-   debug!("ProfilesAlt post_commit() called for {} actions. ({})", signed_actions.len(), zome_info().unwrap().id);
+   debug!(
+      "ProfilesAlt post_commit() called for {} actions. ({})",
+      signed_actions.len(),
+      zome_info().unwrap().id
+   );
    std::panic::set_hook(Box::new(zome_panic_hook));
    attest_post_commit::<EntryTypes, LinkTypes>(signed_actions);
 }
-

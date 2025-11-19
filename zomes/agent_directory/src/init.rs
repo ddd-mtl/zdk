@@ -1,7 +1,7 @@
-use hdk::prelude::*;
+use crate::*;
 #[allow(unused_imports)]
 use agent_directory_integrity::*;
-use crate::*;
+use hdk::prelude::*;
 
 /// On init callback register self to public agent directory.
 #[hdk_extern]
@@ -14,7 +14,6 @@ fn init(_: ()) -> ExternResult<InitCallbackResult> {
    }
    Ok(InitCallbackResult::Pass)
 }
-
 
 /// Register this agent
 fn register_self() -> ExternResult<()> {

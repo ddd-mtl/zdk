@@ -2,7 +2,6 @@ mod validation;
 
 use hdi::prelude::*;
 
-
 /// All link types specific to this Zome
 #[hdk_link_types]
 pub enum AgentDirectoryLinkType {

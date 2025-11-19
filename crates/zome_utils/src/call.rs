@@ -1,14 +1,13 @@
 //! All helper functions calling `call()`
 
-use hdk::prelude::*;
 use crate as zome_utils;
 use crate::zome_error;
-
+use hdk::prelude::*;
 
 /// Remote call to self
 pub fn call_self<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCallResponse>
-   where
-      I: serde::Serialize + std::fmt::Debug
+where
+   I: serde::Serialize + std::fmt::Debug,
 {
    // TODO check fn_name exists?
    call(
@@ -20,12 +19,11 @@ pub fn call_self<I>(fn_name: &str, payload: I) -> ExternResult<ZomeCallResponse>
    )
 }
 
-
 ///
 pub fn call_self_cell<I, O>(zome_name: &str, fn_name: &str, payload: I) -> ExternResult<O>
-   where
-      I: serde::Serialize + std::fmt::Debug,
-      O: serde::de::DeserializeOwned + std::fmt::Debug
+where
+   I: serde::Serialize + std::fmt::Debug,
+   O: serde::de::DeserializeOwned + std::fmt::Debug,
 {
    //debug!("call_self_cell() - {}()", fn_name);
    // TODO check fn_name exists?

@@ -1,9 +1,7 @@
 //! Debugging helpers
 
-use hdk::prelude::*;
 use crate as zome_utils;
-
-
+use hdk::prelude::*;
 
 #[macro_export]
 macro_rules! zome_error {
@@ -22,7 +20,6 @@ macro_rules! zome_error {
    }
 }
 
-
 ///
 pub fn error<T>(reason: &str) -> ExternResult<T> {
    let msg = format!("{} ; Context: {}", reason, dump_context());
@@ -34,12 +31,10 @@ pub fn error<T>(reason: &str) -> ExternResult<T> {
    Err(error)
 }
 
-
 ///
 pub fn invalid(reason: &str) -> ExternResult<ValidateCallbackResult> {
    Ok(ValidateCallbackResult::Invalid(reason.to_string()))
 }
-
 
 /// Return zome context as String
 pub fn dump_context() -> String {
@@ -48,8 +43,10 @@ pub fn dump_context() -> String {
       let maybe_call_info = call_info();
       if let Ok(call_info) = maybe_call_info {
          let provenance = snip(&call_info.provenance);
-         msg.push_str(&format!("'{}::{}()' by {} ",
-                               zome_info.name, call_info.function_name, provenance));
+         msg.push_str(&format!(
+            "'{}::{}()' by {} ",
+            zome_info.name, call_info.function_name, provenance
+         ));
       }
    }
    if let Ok(agent_info) = agent_info() {
@@ -57,7 +54,6 @@ pub fn dump_context() -> String {
    }
    msg
 }
-
 
 /// Panic hook for zome debugging
 pub fn zome_panic_hook(info: &std::panic::PanicHookInfo) {
@@ -68,13 +64,11 @@ pub fn zome_panic_hook(info: &std::panic::PanicHookInfo) {
    error!("{}\n\n", &msg);
 }
 
-
-
 /// Convert ZomeCallResponse to ExternResult
 pub fn decode_response<T>(response: ZomeCallResponse) -> ExternResult<T>
-   where
-      //T: for<'de> serde::Deserialize<'de> + std::fmt::Debug,
-      T: serde::de::DeserializeOwned + std::fmt::Debug
+where
+   //T: for<'de> serde::Deserialize<'de> + std::fmt::Debug,
+   T: serde::de::DeserializeOwned + std::fmt::Debug,
 {
    return match response {
       ZomeCallResponse::Ok(output) => {
@@ -84,12 +78,13 @@ pub fn decode_response<T>(response: ZomeCallResponse) -> ExternResult<T>
          res
       },
       ZomeCallResponse::AuthenticationFailed(_sign, apk) => zome_error!("AuthenticationFailed call: {:?}", apk),
-      ZomeCallResponse::Unauthorized(auth, _, _, fn_name) => zome_error!("Unauthorized call to {}(): {:?}", fn_name, auth),
+      ZomeCallResponse::Unauthorized(auth, _, _, fn_name) => {
+         zome_error!("Unauthorized call to {}(): {:?}", fn_name, auth)
+      },
       ZomeCallResponse::NetworkError(e) => zome_error!("NetworkError: {:?}", e),
       ZomeCallResponse::CountersigningSession(e) => zome_error!("CountersigningSession: {:?}", e),
    };
 }
-
 
 /// Shorten AgentPubKey for printing
 pub fn snip(agent: &AgentPubKey) -> String {

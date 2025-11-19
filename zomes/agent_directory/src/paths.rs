@@ -1,7 +1,7 @@
-use hdk::prelude::*;
-use hdi::hash_path::path::Component;
 #[allow(unused_imports)]
 use agent_directory_integrity::*;
+use hdi::hash_path::path::Component;
+use hdk::prelude::*;
 
 pub const AGENT_DIRECTORY_PATH: &str = "registered_agents";
 
@@ -28,13 +28,16 @@ pub fn agent_to_path(agent_id: &AgentPubKey) -> TypedPath {
       .expect("Path should be typable");
 }
 
-
 /// Get agent_key from a path
 pub fn path_to_agent(agent_path: &Path) -> ExternResult<AgentPubKey> {
    let Some(leaf) = agent_path.leaf() else {
       return Err(wasm_error!(WasmErrorInner::Guest("Path of invalid length".to_string())));
    };
-   let agent_key = AgentPubKey::try_from_raw_39(leaf.as_ref().to_vec())
-      .map_err(|_e| { wasm_error!(WasmErrorInner::Guest(format!("Registered agent_path has invalid AgentPubKey {:?}", leaf))) });
+   let agent_key = AgentPubKey::try_from_raw_39(leaf.as_ref().to_vec()).map_err(|_e| {
+      wasm_error!(WasmErrorInner::Guest(format!(
+         "Registered agent_path has invalid AgentPubKey {:?}",
+         leaf
+      )))
+   });
    agent_key
 }

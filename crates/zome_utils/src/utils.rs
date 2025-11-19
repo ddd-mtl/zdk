@@ -1,16 +1,14 @@
 //! Other helpers
 
-use hdk::prelude::*;
-use crate::*;
 use crate as zome_utils;
-
+use crate::*;
+use hdk::prelude::*;
 
 /// Returns number of seconds since UNIX_EPOCH
 pub fn now() -> u64 {
    let now = sys_time().expect("sys_time() should always work");
    now.as_seconds_and_nanos().0 as u64
 }
-
 
 ///
 pub fn get_zome_index(candidat: ZomeName) -> ExternResult<u8> {
@@ -25,7 +23,6 @@ pub fn get_zome_index(candidat: ZomeName) -> ExternResult<u8> {
    return zome_error!("Unknown Zome");
 }
 
-
 /// Get EntryDefIndex from a unit_enum
 pub fn get_variant_index<T: UnitEnum>(unknown: T::Unit) -> ExternResult<u8> {
    let mut i = 0;
@@ -39,7 +36,6 @@ pub fn get_variant_index<T: UnitEnum>(unknown: T::Unit) -> ExternResult<u8> {
    return zome_error!("Unknown variant");
 }
 
-
 ///
 pub fn get_variant<T: UnitEnum>(entry_index: EntryDefIndex) -> ExternResult<T::Unit> {
    let mut i = 0;
@@ -51,7 +47,6 @@ pub fn get_variant<T: UnitEnum>(entry_index: EntryDefIndex) -> ExternResult<T::U
    }
    return zome_error!("Unknown EntryDefIndex: {}", entry_index.0);
 }
-
 
 //
 // /// Return true if entryType is of a certain entry type from a zome in the DNA
@@ -93,4 +88,3 @@ pub fn get_variant<T: UnitEnum>(entry_index: EntryDefIndex) -> ExternResult<T::U
 //       return Ok(app_entry_def.id() == index);
 //    }
 // }
-

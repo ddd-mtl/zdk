@@ -1,4 +1,3 @@
-
 mod call;
 mod debug;
 mod get;
@@ -15,20 +14,17 @@ pub use query::*;
 pub use relaxed::*;
 pub use utils::*;
 
-
-
 //----------------------------------------------------------------------------------------
 
 #[macro_export]
 macro_rules! return_none {
-    ( $e:expr ) => {
-        match $e {
-            Some(x) => x,
-            None => return Ok(None),
-        }
-    }
+   ( $e:expr ) => {
+      match $e {
+         Some(x) => x,
+         None => return Ok(None),
+      }
+   };
 }
-
 
 // #[macro_export]
 // macro_rules! else_none {
@@ -36,5 +32,3 @@ macro_rules! return_none {
 //             $e else {return Ok(None)};
 //         }
 // }
-
-
