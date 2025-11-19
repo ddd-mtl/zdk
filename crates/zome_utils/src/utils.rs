@@ -48,6 +48,18 @@ pub fn get_variant<T: UnitEnum>(entry_index: EntryDefIndex) -> ExternResult<T::U
    return zome_error!("Unknown EntryDefIndex: {}", entry_index.0);
 }
 
+/// Perform calculations until the given time period has elapsed.
+/// Used for simulating long zome calls when testing.
+pub fn busy_wait(seconds: u32) {
+   let start = sys_time().unwrap().0;
+   let mut end = start;
+   while end - start < seconds as i64 * 1000 * 1000 {
+      // Some arbitrary calculations to keep CPU busy
+      let _ = holo_hash_encode(&vec![end.clone() as u8; 1]);
+      end = sys_time().unwrap().0;
+   }
+}
+
 //
 // /// Return true if entryType is of a certain entry type from a zome in the DNA
 // pub fn is_type(candidat: EntryType, zome_name: &str, type_name: &str) -> ExternResult<bool> {
