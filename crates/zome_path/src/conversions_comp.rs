@@ -29,6 +29,18 @@ pub fn hash2comp<T: HashType>(hash: HoloHash<T>) -> Component {
    str.into()
 }
 
+/// For some unknown reason we get a Bad Checksum error with appletIds when using comp2hash(),
+/// so we are doing the decoding manually without the checksum check here.
+pub fn comp2appletHash(comp: &Component) -> ExternResult<EntryHash> {
+   let hash_str = String::try_from(comp).map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;
+   let str = &hash_str[1..]; //remove the starting 'u' char added during string::try_from()
+   let raw_hash = base64::decode_config(str, base64::URL_SAFE_NO_PAD)
+      .map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;
+   let eh = EntryHash::try_from_raw_39(raw_hash)
+      .map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;
+   Ok(eh)
+}
+
 /// Convert a Component stored in a LinkTag to a String
 /// TODO: Check if same as get_component_from_link_tag()
 pub fn compTag2str(tag: &LinkTag) -> Result<String, SerializedBytesError> {
