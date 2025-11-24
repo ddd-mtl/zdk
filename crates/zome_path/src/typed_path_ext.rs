@@ -1,4 +1,5 @@
-///! Copy of the code from holochain but without internal calls to .ensure()
+///! Copy of the code from holochain but without internal calls to .ensure(),
+///! and added a GetStrategy argument to not force use of default.
 //use hdk::hash_path::path::{Component};
 use hdk::prelude::*;
 
