@@ -4,7 +4,10 @@ use hdk::prelude::*;
 use std::fmt::Debug;
 
 /// Attest Entry or Link on post_commit() as well as SystemAttestation of a PostCommit
-pub fn attest_post_commit<E: UnitEnum, L: LinkTypesHelper + Debug>(signed_actions: Vec<SignedActionHashed>) {
+pub fn attest_post_commit<E: UnitEnum, L: LinkTypesHelper + Debug>(signed_actions: Vec<SignedActionHashed>)
+where
+   <L as LinkTypesHelper>::Error: Debug,
+{
    /// Process each Action
    for sah in signed_actions {
       let ah = sah.as_hash().to_owned();
@@ -12,12 +15,22 @@ pub fn attest_post_commit<E: UnitEnum, L: LinkTypesHelper + Debug>(signed_action
          ///
          Action::CreateLink(create_link) => {
             /// Get LinkType
-            let Ok(Some(_link_type)) = L::from_type(create_link.zome_index, create_link.link_type) else {
-               error!(
-                  "CreateLink should have a LinkType. Could be a Link from a different zome: {} ({}) | {:?}",
-                  create_link.link_type.0, create_link.zome_index, create_link
-               );
-               continue;
+            match L::from_type(create_link.zome_index, create_link.link_type) {
+               Ok(Some(_link_type)) => (),
+               Ok(None) => {
+                  error!(
+                     "CreateLink should have a LinkType. Could be a Link from a different zome: {} ({}) | {:?}",
+                     create_link.link_type.0, create_link.zome_index, create_link
+                  );
+                  continue;
+               },
+               Err(e) => {
+                  error!(
+                     "Getting LinkType from CreateLink failed. Could be a Link from a different zome: {} ({}) | {:?} || error: {:?}",
+                     create_link.link_type.0, create_link.zome_index, create_link, e,
+                  );
+                  continue;
+               },
             };
             /// Emit Link Signal
             let res = attest_link_created(ah, create_link, true);

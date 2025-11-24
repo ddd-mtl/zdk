@@ -14,7 +14,7 @@ pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 #[hdk_extern(infallible)]
 pub fn post_commit(signed_actions: Vec<SignedActionHashed>) {
    debug!(
-      "ProfilesAlt post_commit() called for {} actions. ({})",
+      "ProfilesAlt.post_commit() called on {} actions. (zome index: {})",
       signed_actions.len(),
       zome_info().unwrap().id
    );
