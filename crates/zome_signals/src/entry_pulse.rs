@@ -108,7 +108,7 @@ impl EntryPulse {
          ah: delete_hashed.hash.to_owned(),
          ts: delete_action.timestamp(),
          author: delete_action.author().clone(),
-         eh: delete_action.entry_hash().unwrap().clone(),
+         eh: create.entry_hash.clone(),
          def: def.to_owned(),
          validation,
          bytes,
