@@ -90,7 +90,11 @@ where
                error!("Deleted action not found.");
                continue;
             };
-            let Ok(hashed_entry) = must_get_entry(delete.deletes_entry_address.clone()) else {
+            let Ok(create_sah) = must_get_action(delete.deletes_address.clone()) else {
+               error!("Deleted entry not found.");
+               continue;
+            };
+            let Ok(create_entry) = must_get_entry(delete.deletes_entry_address.clone()) else {
                error!("Deleted entry not found.");
                continue;
             };
@@ -98,13 +102,9 @@ where
                error!("Deleted action should have entry_type.");
                continue;
             };
+            let create_record = Record::new(create_sah.clone(), Some(create_entry.content));
             /// Emit Entry Signal
-            let result = attest_entry_deleted(
-               new_sah.hashed.clone(),
-               hashed_entry.content,
-               new_sah.hashed.entry_type().unwrap().to_owned(),
-               true,
-            );
+            let result = attest_entry_deleted(sah.hashed.clone(), create_record, true);
             /// Emit System Signal
             let type_variant = get_variant_from_index::<E>(app_entry_def.entry_index).unwrap();
             let variant_name = format!("{:?}", type_variant);

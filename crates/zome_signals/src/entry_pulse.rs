@@ -82,35 +82,37 @@ impl EntryPulse {
       })
    }
 
-   /// Input must be the NewEntryAction that is deleted
-   pub fn try_from_delete_record(
+   /// `create_record` must be the NewEntryAction that is deleted
+   pub fn try_with_delete_action(
       delete_hashed: ActionHashed,
-      entry: Entry,
-      entry_type: EntryType,
+      create_record: Record,
       validation: ValidatedBy,
       is_new: bool,
    ) -> ExternResult<Self> {
       let delete_action = delete_hashed.content;
       let Action::Delete(delete) = delete_action.clone() else {
-         return Err(wasm_error!("Unhandled Action type"));
+         return Err(wasm_error!("Action must be a Delete"));
       };
-      let Entry::App(bytes) = entry else {
+      let Action::Create(create) = create_record.action() else {
+         return Err(wasm_error!("Action must be a Create"));
+      };
+      let RecordEntry::Present(Entry::App(bytes)) = create_record.entry.to_owned() else {
          return Err(wasm_error!("Entry is not an App"));
       };
-      let EntryType::App(def) = entry_type else {
+      let EntryType::App(def) = create.entry_type.clone() else {
          return Err(wasm_error!("entry_type is not an App type"));
       };
 
       Ok(Self {
          orig_ah: Some(delete.deletes_address),
          ah: delete_hashed.hash.to_owned(),
-         eh: delete_action.entry_hash().unwrap().clone(),
          ts: delete_action.timestamp(),
          author: delete_action.author().clone(),
-         state: StateChange::Delete(is_new),
-         validation,
+         eh: delete_action.entry_hash().unwrap().clone(),
          def: def.to_owned(),
+         validation,
          bytes,
+         state: StateChange::Delete(is_new),
       })
    }
 
