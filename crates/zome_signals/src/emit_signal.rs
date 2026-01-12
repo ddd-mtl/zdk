@@ -37,8 +37,8 @@ pub fn attest_entry_created(record: Record, is_new: bool) -> ExternResult<()> {
 }
 
 ///
-pub fn attest_entry_deleted(ha: ActionHashed, entry: Entry, is_new: bool) -> ExternResult<()> {
-   let pulse = EntryPulse::try_from_delete_record(ha, entry, ValidatedBy::Me, is_new)?;
+pub fn attest_entry_deleted(ha: ActionHashed, entry: Entry, entry_type: EntryType, is_new: bool) -> ExternResult<()> {
+   let pulse = EntryPulse::try_from_delete_record(ha, entry, entry_type, ValidatedBy::Me, is_new)?;
    return emit_zome_signal(vec![ZomeSignalProtocol::Entry(pulse)]);
 }
 

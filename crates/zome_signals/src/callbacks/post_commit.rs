@@ -90,7 +90,7 @@ where
                error!("Deleted action not found.");
                continue;
             };
-            let Ok(eh) = must_get_entry(delete.deletes_entry_address.clone()) else {
+            let Ok(hashed_entry) = must_get_entry(delete.deletes_entry_address.clone()) else {
                error!("Deleted entry not found.");
                continue;
             };
@@ -99,7 +99,12 @@ where
                continue;
             };
             /// Emit Entry Signal
-            let result = attest_entry_deleted(new_sah.hashed.clone(), eh.content, true);
+            let result = attest_entry_deleted(
+               new_sah.hashed.clone(),
+               hashed_entry.content,
+               new_sah.hashed.entry_type().unwrap().to_owned(),
+               true,
+            );
             /// Emit System Signal
             let type_variant = get_variant_from_index::<E>(app_entry_def.entry_index).unwrap();
             let variant_name = format!("{:?}", type_variant);

@@ -5,8 +5,8 @@ use hdk::prelude::*;
 #[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
 pub enum ValidatedBy {
    None,    // Untrusted, e.g. received remotely from another agent via a signal
-   Me,      // I commited the action
-   Peer,    // There is at least one valid validation receipt and I also validated it
+   Me,      // I committed the action
+   Peer,    // There is at least one valid validation receipt, and I also validated it
    Network, // Trusted, received from DHT (enough valid validation receipts)
 }
 
@@ -84,28 +84,29 @@ impl EntryPulse {
 
    /// Input must be the NewEntryAction that is deleted
    pub fn try_from_delete_record(
-      hashed: ActionHashed,
+      delete_hashed: ActionHashed,
       entry: Entry,
+      entry_type: EntryType,
       validation: ValidatedBy,
       is_new: bool,
    ) -> ExternResult<Self> {
-      let action = hashed.content;
-      let Action::Delete(delete) = action.clone() else {
+      let delete_action = delete_hashed.content;
+      let Action::Delete(delete) = delete_action.clone() else {
          return Err(wasm_error!("Unhandled Action type"));
       };
       let Entry::App(bytes) = entry else {
          return Err(wasm_error!("Entry is not an App"));
       };
-      let Some(EntryType::App(def)) = action.entry_type() else {
-         return Err(wasm_error!("Entry has no entry def"));
+      let EntryType::App(def) = entry_type else {
+         return Err(wasm_error!("entry_type is not an App type"));
       };
 
       Ok(Self {
-         orig_ah: Some(delete.prev_action),
-         ah: hashed.hash.to_owned(),
-         eh: action.entry_hash().unwrap().clone(),
-         ts: action.timestamp(),
-         author: action.author().clone(),
+         orig_ah: Some(delete.deletes_address),
+         ah: delete_hashed.hash.to_owned(),
+         eh: delete_action.entry_hash().unwrap().clone(),
+         ts: delete_action.timestamp(),
+         author: delete_action.author().clone(),
          state: StateChange::Delete(is_new),
          validation,
          def: def.to_owned(),
