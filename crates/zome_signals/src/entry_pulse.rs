@@ -46,8 +46,15 @@ pub struct EntryPulse {
 }
 
 impl EntryPulse {
+   ///
    pub fn clear_validation(&mut self) {
       self.validation = ValidatedBy::None;
+   }
+
+   ///
+   pub fn change_author(&mut self, author: AgentPubKey, ts: Timestamp) {
+      self.author = author;
+      self.ts = ts;
    }
 
    /// Can't do delete here since it does not hold the entry data
