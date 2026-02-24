@@ -1,5 +1,7 @@
 use hdk::prelude::*;
 
+pub mod get_input_types;
+
 #[hdk_extern]
 fn get_zome_info(_: ()) -> ExternResult<ZomeInfo> {
    return zome_info();

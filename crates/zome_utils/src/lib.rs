@@ -1,7 +1,6 @@
 mod call;
 mod debug;
 mod get;
-mod get_input_types;
 mod links;
 mod query;
 mod relaxed;
@@ -10,7 +9,6 @@ mod utils;
 pub use call::*;
 pub use debug::*;
 pub use get::*;
-pub use get_input_types::*;
 pub use links::*;
 pub use query::*;
 pub use relaxed::*;

@@ -16,7 +16,6 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde.workspace = true
 hdk.workspace = true
-holochain_serialized_bytes.workspace = true
 
 # Broken hdk deps
 #getrandom = { version = "=0.3.4", features = ["wasm_js"] }
