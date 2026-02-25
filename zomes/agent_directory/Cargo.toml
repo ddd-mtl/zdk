@@ -17,3 +17,4 @@ crate-type = ["cdylib", "rlib"]
 hdk.workspace = true
 agent_directory_integrity = { path = "../agent_directory_integrity" }
 zome_core = { path = "../zome_core" }
+zome_path = { path = "../../crates/zome_path" }

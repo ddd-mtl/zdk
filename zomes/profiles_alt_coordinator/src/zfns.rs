@@ -1,5 +1,6 @@
 use hc_zome_profiles_integrity::*;
 use hdk::prelude::*;
+use zome_path::*;
 use zome_signals::*;
 use zome_utils::*;
 
@@ -162,7 +163,7 @@ pub fn find_latest_profile(
 pub fn probe_profiles(strategy: GetStrategy) -> ExternResult<()> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let path = Path::from("all_profiles").typed(LinkTypes::PrefixPath)?;
-   let children = path.children_paths()?;
+   let children = tp_children_paths(&path, strategy)?;
    let get_links_input: Vec<GetLinksInput> = children
       .into_iter()
       .map(|path| {
