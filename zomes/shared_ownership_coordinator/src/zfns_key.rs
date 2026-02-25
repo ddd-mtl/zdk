@@ -23,7 +23,7 @@ where
    /// Serialize
    let data: XSalsa20Poly1305Data = bincode::serialize(&data).unwrap().into();
    /// Get Key
-   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone(), GetStrategy::Network)?;
+   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone(), GetStrategy::Local)?;
    /// Encrypt
    let enc_data = x_salsa20_poly1305_encrypt(key.key_ref, data)?;
    Ok(enc_data)
@@ -35,7 +35,7 @@ where
    T: for<'a> serde::Deserialize<'a> + Clone + Sized + std::fmt::Debug,
 {
    /// Get Key
-   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone(), GetStrategy::Network)?;
+   let (_eh, key) = get_typed_from_ah::<SharedKey>(key_ah.clone(), GetStrategy::Local)?;
    /// Encrypt
    let Some(ser_data) = x_salsa20_poly1305_decrypt(key.key_ref, enc_data)? else {
       return zome_error!("Failed to decrypt data");

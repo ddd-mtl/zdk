@@ -3,15 +3,15 @@ use hdk::prelude::*;
 use zome_signals::*;
 use zome_utils::*;
 
-/// (zits currently cant handle destructured function arguments)
+/// (zits currently can't handle destructured function arguments)
 #[hdk_extern]
 #[feature(zits_blocking)]
 pub fn create_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> {
    let profile = pair.0;
    let agent_address = pair.1;
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Check
-   let maybe_profile = find_latest_profile(agent_address.clone())?;
+   /// Check on network if already created to avoid conflicts
+   let maybe_profile = find_latest_profile(agent_address.clone(), GetStrategy::Network)?;
    if let Some(_profile) = maybe_profile {
       return error("Agent already has a Profile");
    }
@@ -39,12 +39,14 @@ pub fn update_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
    let agent_address = pair.1;
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Update Entry
-   let Some((previous_profile, previous_record, previous_link)) = find_latest_profile(agent_address.clone())? else {
+   let Some((previous_profile, previous_record, previous_link)) =
+      find_latest_profile(agent_address.clone(), GetStrategy::Network)?
+   else {
       return zome_error!("No profile to update");
    };
    let new_ah = update_entry(previous_record.action_address().to_owned(), &profile)?;
    /// "Update" link
-   let _ = delete_link(previous_link.create_link_hash, GetOptions::default())?;
+   let _ = delete_link(previous_link.create_link_hash, GetOptions::network())?;
    let _ = create_link(agent_address.clone(), new_ah.clone(), LinkTypes::AgentToProfile, ())?;
    /// If we have changed the nickname, remove the previous nickname link and add a new one
    if previous_profile.nickname.ne(&profile.nickname) {
@@ -54,12 +56,12 @@ pub fn update_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
             AnyLinkableHash::from(previous_prefix_path.path_entry_hash()?),
             LinkTypes::PathToAgent,
          )?,
-         GetStrategy::Network,
+         GetStrategy::Network, // Agent should have access to the Network to update a Profile to minimize conflict
       )?;
       for l in links {
          if let Ok(pub_key) = AgentPubKey::try_from(l.target) {
             if agent_address.eq(&pub_key) {
-               delete_link(l.create_link_hash, GetOptions::default())?;
+               delete_link(l.create_link_hash, GetOptions::network())?;
             }
          }
       }
@@ -79,7 +81,7 @@ pub fn update_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
 /// From a nickname filter of at least 3 characters, returns all the agents whose nickname starts with that prefix
 /// Ignores the nickname case, will return upper or lower case nicknames that match
 #[hdk_extern]
-pub fn search_agents(nickname_filter: String) -> ExternResult<Vec<AgentPubKey>> {
+pub fn search_agents_network(nickname_filter: String) -> ExternResult<Vec<AgentPubKey>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    if nickname_filter.len() < 3 {
       return zome_error!("Cannot search with a prefix less than 3 characters");
@@ -105,9 +107,23 @@ pub fn search_agents(nickname_filter: String) -> ExternResult<Vec<AgentPubKey>> 
 
 /// Return the profile for the given agent, if any
 #[hdk_extern]
-pub fn find_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
+pub fn find_profile_network(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
-   let Some((profile, record, link)) = find_latest_profile(agent_pub_key)? else {
+   let Some((profile, record, link)) = find_latest_profile(agent_pub_key, GetStrategy::Network)? else {
+      return Ok(None);
+   };
+   ///
+   attest_link(link, StateChange::Create(false))?;
+   attest_entry_created(record.clone(), false)?;
+   ///
+   Ok(Some((record.action_address().to_owned(), profile)))
+}
+
+/// Return the profile for the given agent, if any
+#[hdk_extern]
+pub fn find_profile_local(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
+   std::panic::set_hook(Box::new(zome_panic_hook));
+   let Some((profile, record, link)) = find_latest_profile(agent_pub_key, GetStrategy::Local)? else {
       return Ok(None);
    };
    ///
@@ -118,12 +134,15 @@ pub fn find_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHa
 }
 
 /// Return the latest profile for the given agent, if any
-pub fn find_latest_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<(Profile, Record, Link)>> {
+pub fn find_latest_profile(
+   agent_pub_key: AgentPubKey,
+   strategy: GetStrategy,
+) -> ExternResult<Option<(Profile, Record, Link)>> {
    let links = get_links(
       LinkQuery::try_new(agent_pub_key, LinkTypes::AgentToProfile)?,
-      GetStrategy::Network,
+      strategy.clone(),
    )?;
-   if links.len() == 0 {
+   if links.is_empty() {
       return Ok(None);
    }
    if links.len() > 1 {
@@ -131,7 +150,7 @@ pub fn find_latest_profile(agent_pub_key: AgentPubKey) -> ExternResult<Option<(P
    }
    let link = &links[0];
    let first_profile_ah = link.target.clone().into_action_hash().unwrap();
-   let record = get_latest_record(first_profile_ah.clone())?;
+   let record = get_latest_record(first_profile_ah.clone(), strategy.into())?;
    let profile = get_typed_from_record::<Profile>(record.clone())?;
    ///
    Ok(Some((profile, record, link.clone())))

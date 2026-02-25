@@ -164,9 +164,10 @@ pub fn get_app_entry_name_from_def(
 ///
 pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBytesError>>(
    entry_hash: EntryHash,
+   options: GetOptions,
 ) -> ExternResult<OptionTypedEntryAndHash<T>> {
    /// First, make sure we DO have the latest action_hash address
-   let maybe_maybe_details = get_details(entry_hash.clone(), GetOptions::network())?;
+   let maybe_maybe_details = get_details(entry_hash.clone(), options.clone())?;
    let Some(Details::Entry(details)) = maybe_maybe_details else {
       return Ok(None);
    };
@@ -186,7 +187,7 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
       },
    };
    /// Second, go and get that Record, and return its entry and action_address
-   let Some(record) = get(latest_ah, GetOptions::network())? else {
+   let Some(record) = get(latest_ah, options.clone())? else {
       return Ok(None);
    };
    let maybe_maybe_typed_entry = record.entry().to_app_option::<T>();
@@ -208,8 +209,8 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
 }
 
 ///
-pub fn get_latest_entry(target: EntryHash) -> ExternResult<Option<Entry>> {
-   let details = get_details(target, GetOptions::network())?;
+pub fn get_latest_entry(target: EntryHash, options: GetOptions) -> ExternResult<Option<Entry>> {
+   let details = get_details(target, options.clone())?;
    let Some(Details::Entry(EntryDetails { entry, updates, .. })) = details else {
       return Ok(None);
    };
@@ -232,24 +233,24 @@ pub fn get_latest_entry(target: EntryHash) -> ExternResult<Option<Entry>> {
       })
       .expect("updates are not empty");
    let eh = sah.action().entry_hash().unwrap();
-   let record = get_record(AnyDhtHash::from(eh.to_owned()), GetStrategy::Network)?;
+   let record = get_record(AnyDhtHash::from(eh.to_owned()), options.strategy)?;
    Ok(record.entry.into_option())
 }
 
 /// Recursively call get_details() until no updates are found
 /// If multiple updates are found. It will take the last one in the list.
-pub fn get_latest_record(ah: ActionHash) -> ExternResult<Record> {
-   let Some(details) = get_details(ah.clone(), GetOptions::network())? else {
+pub fn get_latest_record(ah: ActionHash, options: GetOptions) -> ExternResult<Record> {
+   let Some(details) = get_details(ah.clone(), options.clone())? else {
       return zome_error!("{}", format!("Record not found at hash {}", ah));
    };
    match details {
       Details::Entry(_) => zome_error!("{}", format!("Malformed details for hash {}", ah)),
       Details::Record(element_details) => {
          match element_details.updates.last() {
-            Some(update) => match get_latest_record(update.action_address().clone()) {
+            Some(update) => match get_latest_record(update.action_address().clone(), options) {
                Ok(record) => Ok(record),
                Err(_) => {
-                  //println!("Failed to find latest record. Returning previous one.");
+                  //debug!("Failed to find latest record. Returning previous one.");
                   Ok(element_details.record)
                },
             },

@@ -53,7 +53,11 @@ pub fn into_dht_hash(yh: AnyLinkableHash) -> ExternResult<AnyDhtHash> {
 }
 
 ///
-fn links_to_GetInputs(links: Vec<Link>, maybe_filter: Option<AnyLinkable>) -> Vec<(GetInput, Link)> {
+fn links_to_GetInputs(
+   links: Vec<Link>,
+   options: GetOptions,
+   maybe_filter: Option<AnyLinkable>,
+) -> Vec<(GetInput, Link)> {
    let mut get_inputs: Vec<(GetInput, Link)> = Vec::new();
    for link in links.into_iter() {
       let input = match link.target.hash_type() {
@@ -61,19 +65,13 @@ fn links_to_GetInputs(links: Vec<Link>, maybe_filter: Option<AnyLinkable>) -> Ve
             if let Some(AnyLinkable::Action) = maybe_filter {
                continue;
             }
-            GetInput::new(
-               link.target.clone().into_entry_hash().unwrap().into(),
-               GetOptions::network(),
-            )
+            GetInput::new(link.target.clone().into_entry_hash().unwrap().into(), options.clone())
          },
          AnyLinkable::Action => {
             if let Some(AnyLinkable::Entry) = maybe_filter {
                continue;
             }
-            GetInput::new(
-               link.target.clone().into_action_hash().unwrap().into(),
-               GetOptions::network(),
-            )
+            GetInput::new(link.target.clone().into_action_hash().unwrap().into(), options.clone())
          },
          AnyLinkable::External => continue,
       };
@@ -99,7 +97,7 @@ pub fn get_typed_from_links<R: TryFrom<Entry>>(
 ) -> ExternResult<Vec<(R, Link)>> {
    let links = get_links(query, strategy)?;
    //debug!("get_typed_from_links() links found: {}", links.len());
-   let input_pairs = links_to_GetInputs(links, None);
+   let input_pairs = links_to_GetInputs(links, strategy.into(), None);
    //debug!("get_typed_from_links() input_pairs: {}", input_pairs.len());
    let mut typed_pairs: Vec<(R, Link)> = Vec::new();
    for pair in input_pairs.into_iter() {
@@ -123,7 +121,7 @@ pub fn get_typed_from_actions_links<T: TryFrom<Entry>>(
 ) -> ExternResult<Vec<(ActionHash, AnyLinkableHash, AgentPubKey, T)>> {
    let links = get_links(query, strategy)?;
    //debug!("get_typed_from_actions_links() links found: {}", links.len());
-   let input_pairs = links_to_GetInputs(links, Some(AnyLinkable::Action));
+   let input_pairs = links_to_GetInputs(links, strategy.into(), Some(AnyLinkable::Action));
    //debug!("get_typed_from_actions_links() input_pairs: {}", input_pairs.len());
    let mut tuples: Vec<(ActionHash, AnyLinkableHash, AgentPubKey, T)> = Vec::new();
    for (_input, link) in input_pairs.into_iter() {

@@ -12,7 +12,7 @@ pub fn get_all_items_from_anchor_local(leaf_anchor: String) -> ExternResult<Vec<
       return zome_error!("get_all_items() Failed. Input string is empty");
    }
    let path = Path::from(leaf_anchor.clone());
-   let lls = get_all_itemlinks(path, None, GetStrategy::Network)?;
+   let lls = get_all_itemlinks(path, None, GetStrategy::Local)?;
    debug!("leaf_anchor = {} ; found {}", leaf_anchor, lls.len());
    Ok(lls)
 }
