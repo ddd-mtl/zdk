@@ -31,7 +31,9 @@ pub fn get_all_CapGrants() -> ExternResult<Vec<CapGrant>> {
 }
 
 /// Return vec of typed entries of given entry type found in local source chain
-pub fn get_all_typed_local<R: TryFrom<Entry>>(entry_type: EntryType) -> ExternResult<Vec<(ActionHash, Create, R)>> {
+pub fn get_all_typed_from_source_chain<R: TryFrom<Entry>>(
+   entry_type: EntryType,
+) -> ExternResult<Vec<(ActionHash, Create, R)>> {
    /// Query type
    let query_args = ChainQueryFilter::default()
       .include_entries(true)

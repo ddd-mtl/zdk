@@ -6,7 +6,7 @@ use zome_utils::*;
 
 /// Return all ItemLinks from a LeafAnchor
 #[hdk_extern]
-pub fn get_all_items_from_anchor_local(leaf_anchor: String) -> ExternResult<Vec<ItemLink>> {
+pub fn get_all_items_from_anchor_from_local(leaf_anchor: String) -> ExternResult<Vec<ItemLink>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    if leaf_anchor.is_empty() {
       return zome_error!("get_all_items() Failed. Input string is empty");
@@ -19,7 +19,7 @@ pub fn get_all_items_from_anchor_local(leaf_anchor: String) -> ExternResult<Vec<
 
 /// Return all ItemLinks from a LeafAnchor
 #[hdk_extern]
-pub fn get_all_items_from_anchor_network(leaf_anchor: String) -> ExternResult<Vec<ItemLink>> {
+pub fn get_all_items_from_anchor_from_network(leaf_anchor: String) -> ExternResult<Vec<ItemLink>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    if leaf_anchor.is_empty() {
       return zome_error!("get_all_items() Failed. Input string is empty");

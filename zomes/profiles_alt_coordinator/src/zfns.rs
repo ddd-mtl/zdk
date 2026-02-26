@@ -82,7 +82,7 @@ pub fn update_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
 /// From a nickname filter of at least 3 characters, returns all the agents whose nickname starts with that prefix
 /// Ignores the nickname case, will return upper or lower case nicknames that match
 #[hdk_extern]
-pub fn search_agents_network(nickname_filter: String) -> ExternResult<Vec<AgentPubKey>> {
+pub fn search_agents(nickname_filter: String) -> ExternResult<Vec<AgentPubKey>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    if nickname_filter.len() < 3 {
       return zome_error!("Cannot search with a prefix less than 3 characters");
@@ -94,7 +94,7 @@ pub fn search_agents_network(nickname_filter: String) -> ExternResult<Vec<AgentP
       LinkTypes::PathToAgent,
    )?
    .tag_prefix(LinkTag::new(nickname_filter.to_lowercase().as_bytes().to_vec()));
-   let links = get_links(input, GetStrategy::Network)?;
+   let links = get_links(input, GetStrategy::Local)?;
    ///
    let mut agents: Vec<AgentPubKey> = vec![];
    for link in links {
@@ -108,7 +108,7 @@ pub fn search_agents_network(nickname_filter: String) -> ExternResult<Vec<AgentP
 
 /// Return the profile for the given agent, if any
 #[hdk_extern]
-pub fn find_profile_network(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
+pub fn find_profile_from_network(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let Some((profile, record, link)) = find_latest_profile(agent_pub_key, GetStrategy::Network)? else {
       return Ok(None);
@@ -122,7 +122,7 @@ pub fn find_profile_network(agent_pub_key: AgentPubKey) -> ExternResult<Option<(
 
 /// Return the profile for the given agent, if any
 #[hdk_extern]
-pub fn find_profile_local(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
+pub fn find_profile_from_local(agent_pub_key: AgentPubKey) -> ExternResult<Option<(ActionHash, Profile)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    let Some((profile, record, link)) = find_latest_profile(agent_pub_key, GetStrategy::Local)? else {
       return Ok(None);

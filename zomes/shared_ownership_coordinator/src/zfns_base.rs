@@ -92,14 +92,14 @@ pub fn probe_shareds(strategy: GetStrategy) -> ExternResult<Vec<ActionHash>> {
 
 ///
 #[hdk_extern]
-pub fn probe_owners_network(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
+pub fn probe_owners_from_network(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    probe_owners(shared_ah, GetStrategy::Network)
 }
 
 ///
 #[hdk_extern]
-pub fn probe_owners_local(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
+pub fn probe_owners_from_local(shared_ah: ActionHash) -> ExternResult<Vec<(AgentPubKey, ActionHash)>> {
    std::panic::set_hook(Box::new(zome_panic_hook));
    probe_owners(shared_ah, GetStrategy::Local)
 }
