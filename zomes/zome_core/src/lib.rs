@@ -31,14 +31,14 @@ fn get_record_author_network(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
 
 ///
 #[hdk_extern]
-pub fn get_record_local(hash: AnyDhtHash) -> ExternResult<Option<Record>> {
+pub fn get_record_from_local(hash: AnyDhtHash) -> ExternResult<Option<Record>> {
    let maybe_record = get(hash.clone(), GetOptions::local())?;
    Ok(maybe_record)
 }
 
 ///
 #[hdk_extern]
-pub fn get_record_network(hash: AnyDhtHash) -> ExternResult<Option<Record>> {
+pub fn get_record_from_network(hash: AnyDhtHash) -> ExternResult<Option<Record>> {
    let maybe_record = get(hash.clone(), GetOptions::network())?;
    Ok(maybe_record)
 }

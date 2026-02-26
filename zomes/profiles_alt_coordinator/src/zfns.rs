@@ -11,8 +11,8 @@ pub fn create_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
    let profile = pair.0;
    let agent_address = pair.1;
    std::panic::set_hook(Box::new(zome_panic_hook));
-   /// Check on network if already created to avoid conflicts
-   let maybe_profile = find_latest_profile(agent_address.clone(), GetStrategy::Network)?;
+   /// Check if already created to avoid conflicts
+   let maybe_profile = find_latest_profile(agent_address.clone(), GetStrategy::Local)?;
    if let Some(_profile) = maybe_profile {
       return error("Agent already has a Profile");
    }
@@ -36,18 +36,18 @@ pub fn create_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
 #[hdk_extern]
 #[feature(zits_blocking)]
 pub fn update_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> {
+   let strategy = GetStrategy::Local;
    let profile = pair.0;
    let agent_address = pair.1;
    std::panic::set_hook(Box::new(zome_panic_hook));
    /// Update Entry
-   let Some((previous_profile, previous_record, previous_link)) =
-      find_latest_profile(agent_address.clone(), GetStrategy::Network)?
+   let Some((previous_profile, previous_record, previous_link)) = find_latest_profile(agent_address.clone(), strategy)?
    else {
       return zome_error!("No profile to update");
    };
    let new_ah = update_entry(previous_record.action_address().to_owned(), &profile)?;
    /// "Update" link
-   let _ = delete_link(previous_link.create_link_hash, GetOptions::network())?;
+   let _ = delete_link(previous_link.create_link_hash, strategy.clone().into())?;
    let _ = create_link(agent_address.clone(), new_ah.clone(), LinkTypes::AgentToProfile, ())?;
    /// If we have changed the nickname, remove the previous nickname link and add a new one
    if previous_profile.nickname.ne(&profile.nickname) {
@@ -57,12 +57,12 @@ pub fn update_profile(pair: (Profile, AgentPubKey)) -> ExternResult<ActionHash> 
             AnyLinkableHash::from(previous_prefix_path.path_entry_hash()?),
             LinkTypes::PathToAgent,
          )?,
-         GetStrategy::Network, // Agent should have access to the Network to update a Profile to minimize conflict
+         strategy, // Agent should have access to the Network to update a Profile to minimize conflict
       )?;
       for l in links {
          if let Ok(pub_key) = AgentPubKey::try_from(l.target) {
             if agent_address.eq(&pub_key) {
-               delete_link(l.create_link_hash, GetOptions::network())?;
+               delete_link(l.create_link_hash, strategy.clone().into())?;
             }
          }
       }
