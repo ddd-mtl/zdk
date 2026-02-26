@@ -20,12 +20,12 @@ fn get_my_agent_key_entry_hash(_: ()) -> ExternResult<AnyLinkableHash> {
 }
 
 #[hdk_extern]
-fn get_record_author_local(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
+fn get_record_author_from_local(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
    return zome_utils::get_author(dh, GetStrategy::Local);
 }
 
 #[hdk_extern]
-fn get_record_author_network(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
+fn get_record_author_from_network(dh: AnyDhtHash) -> ExternResult<AgentPubKey> {
    return zome_utils::get_author(dh, GetStrategy::Network);
 }
 
@@ -45,7 +45,7 @@ pub fn get_record_from_network(hash: AnyDhtHash) -> ExternResult<Option<Record>>
 
 ///
 #[hdk_extern]
-pub fn get_ah_local(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
+pub fn get_ah_from_local(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
    debug!("get_ah() {}", eh);
    let maybe_record = get(eh, GetOptions::local())?;
    let Some(record) = maybe_record else { return Ok(None) };
@@ -54,7 +54,7 @@ pub fn get_ah_local(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
 
 ///
 #[hdk_extern]
-pub fn get_ah_network(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
+pub fn get_ah_from_network(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
    debug!("get_ah() {}", eh);
    let maybe_record = get(eh, GetOptions::network())?;
    let Some(record) = maybe_record else { return Ok(None) };
