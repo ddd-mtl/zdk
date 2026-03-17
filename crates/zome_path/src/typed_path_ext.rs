@@ -1,3 +1,4 @@
+use hdk::hdi::hash_path::path::root_hash;
 ///! Copy of the code from holochain but without internal calls to .ensure(),
 ///! and added a GetStrategy argument to not force use of default.
 //use hdk::hash_path::path::{Component};
@@ -64,6 +65,40 @@ pub fn links_to_paths(tp: &TypedPath, children: Vec<Link>) -> ExternResult<Vec<T
          new_path.into_typed(tp.link_type)
       })
       .collect())
+}
+
+/// Does data exist at the hash we expect?
+pub fn tp_exists(tp: &TypedPath, strategy: GetStrategy) -> ExternResult<bool> {
+   if tp.0.is_empty() {
+      Ok(false)
+   } else if tp.is_root() {
+      let this_paths_hash: AnyLinkableHash = tp.path_entry_hash()?.into();
+      let exists = get_links(
+         LinkQuery::new(
+            root_hash()?,
+            LinkTypeFilter::single_type(tp.link_type.zome_index, tp.link_type.zome_type),
+         )
+         .tag_prefix(tp.make_tag()?),
+         strategy,
+      )?
+      .iter()
+      .any(|Link { target, .. }| *target == this_paths_hash);
+      Ok(exists)
+   } else {
+      let parent = tp.parent().expect("Must have parent if not empty or root");
+      let this_paths_hash: AnyLinkableHash = tp.path_entry_hash()?.into();
+      let exists = get_links(
+         LinkQuery::new(
+            parent.path_entry_hash()?,
+            LinkTypeFilter::single_type(tp.link_type.zome_index, tp.link_type.zome_type),
+         )
+         .tag_prefix(tp.make_tag()?),
+         strategy,
+      )?
+      .iter()
+      .any(|Link { target, .. }| *target == this_paths_hash);
+      Ok(exists)
+   }
 }
 
 ///--------------------------------------------------------------------------------------------------
