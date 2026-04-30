@@ -33,7 +33,7 @@ where
                },
             };
             /// Emit Link Signal
-            let res = attest_link_created(ah, create_link, true);
+            let res = attest_link_created(ah, create_link, ValidatedBy::Me, true);
             if let Err(e) = &res {
                error!("Emitting CreateLink signal failed: {:?}", e);
             }
@@ -54,7 +54,7 @@ where
                continue;
             };
             /// Emit Link Signal
-            let res = attest_link_deleted(delete_link, create_link, true);
+            let res = attest_link_deleted(delete_link, create_link, ValidatedBy::Me, true);
             if let Err(e) = &res {
                error!("Emitting DeleteLink signal failed: {:?}", e);
             }
@@ -70,7 +70,7 @@ where
                continue;
             };
             /// Emit Entry Signal
-            let result = attest_new_entry(sah.clone());
+            let result = attest_new_entry(sah.clone(), ValidatedBy::Me);
             /// Emit System Signal
             let type_variant = get_variant_from_index::<E>(app_entry_def.entry_index).unwrap();
             let variant_name = format!("{:?}", type_variant);
@@ -104,7 +104,7 @@ where
             };
             let create_record = Record::new(create_sah.clone(), Some(create_entry.content));
             /// Emit Entry Signal
-            let result = attest_entry_deleted(sah.hashed.clone(), create_record, true);
+            let result = attest_entry_deleted(sah.hashed.clone(), create_record, ValidatedBy::Me, true);
             /// Emit System Signal
             let type_variant = get_variant_from_index::<E>(app_entry_def.entry_index).unwrap();
             let variant_name = format!("{:?}", type_variant);

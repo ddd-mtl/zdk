@@ -10,7 +10,7 @@ pub enum ValidatedBy {
    Network, // Trusted, received from DHT (enough valid validation receipts)
 }
 
-/// Bool: True if state change just happened (real-time)
+/// Bool: True if state change just happened (e.g. real-time)
 #[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
 pub enum StateChange {
    Create(bool),

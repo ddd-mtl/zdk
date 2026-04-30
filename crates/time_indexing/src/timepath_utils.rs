@@ -1,5 +1,5 @@
 //use std::array::TryFromSliceError;
-use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, Timelike, Utc};
+use chrono::{DateTime, Datelike, NaiveDate, Timelike, Utc};
 use hdi::hash_path::path::{Component, TypedPath};
 use hdk::prelude::*;
 use zome_path::*;
@@ -48,7 +48,8 @@ pub fn convert_component_to_i32(component: &Component) -> ExternResult<i32> {
 /// Convert timestamp to timepath
 pub fn ts2timepath(time: Timestamp) -> Path {
    let (secs, ns) = time.as_seconds_and_nanos();
-   let dtc = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(secs, ns).unwrap(), Utc);
+   //let dtc = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(secs, ns).unwrap(), Utc);
+   let dtc = DateTime::from_timestamp(secs, ns).unwrap();
    let mut components: Vec<Component> = Vec::new();
 
    components.push((dtc.year() as i32).to_string().into());
@@ -63,7 +64,7 @@ pub fn ts2timepath(time: Timestamp) -> Path {
 /// Convert timestamp to typed timepath
 pub fn get_time_path(tp: TypedPath, time: Timestamp) -> ExternResult<TypedPath> {
    let (secs, ns) = time.as_seconds_and_nanos();
-   let dtc = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(secs, ns).unwrap(), Utc);
+   let dtc = DateTime::from_timestamp(secs, ns).unwrap();
    let mut components: Vec<_> = tp.path.into();
 
    components.push((dtc.year() as i32).to_string().into());
@@ -148,12 +149,11 @@ pub fn convert_timepath_to_timestamp(path: Path) -> ExternResult<Timestamp> {
 
    //debug!("convert_timepath_to_timestamp() {}-{}-{} {}", year, month, day, hour);
 
-   let naive = NaiveDate::from_ymd_opt(year, month as u32, day as u32)
+   let dtc: DateTime<Utc> = NaiveDate::from_ymd_opt(year, month as u32, day as u32)
       .unwrap()
       .and_hms_opt(hour as u32, 0, 0)
-      .unwrap();
-
-   let dtc: DateTime<Utc> = DateTime::<Utc>::from_utc(naive, Utc);
+      .unwrap()
+      .and_utc();
 
    let ts = Timestamp::from_micros(dtc.timestamp_micros());
    Ok(ts)

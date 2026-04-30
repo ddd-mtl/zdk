@@ -1,3 +1,4 @@
+use crate::ValidatedBy;
 use hdk::prelude::*;
 
 /// same as get_variant() from zome_utils; but we don't want any dep
@@ -39,4 +40,41 @@ fn dump_context() -> String {
       msg.push_str(&format!("in chain of agent {snip}"));
    }
    msg
+}
+
+///
+pub fn determine_record_validation(record: Record, me: &AgentPubKey) -> ValidatedBy {
+   if record.action().author() != me {
+      return ValidatedBy::None;
+   }
+   return determine_validation(record.action_address());
+}
+
+///
+pub fn determine_validation(ah: &ActionHash) -> ValidatedBy {
+   let receipts = get_validation_receipts(GetValidationReceiptsInput::new(ah.clone()));
+   match receipts {
+      Ok(receipts) => {
+         let maybe_record_receipts: Option<&ValidationReceiptSet> =
+            receipts.iter().find(|receipt_set| receipt_set.op_type == "StoreRecord");
+         if let Some(record_receipts) = maybe_record_receipts {
+            if record_receipts.receipts_complete {
+               ValidatedBy::Network
+            } else {
+               let count = record_receipts
+                  .receipts
+                  .iter()
+                  .filter(|receipt| receipt.validation_status == ValidationStatus::Valid)
+                  .count();
+               if count == 0 { ValidatedBy::Me } else { ValidatedBy::Peer }
+            }
+         } else {
+            ValidatedBy::Me
+         }
+      },
+      Err(e) => {
+         error!("determineValidation() failed: {:?}", e);
+         ValidatedBy::Me
+      },
+   }
 }

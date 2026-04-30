@@ -114,8 +114,8 @@ pub fn find_profile_from_network(agent_pub_key: AgentPubKey) -> ExternResult<Opt
       return Ok(None);
    };
    ///
-   attest_link(link, StateChange::Create(false))?;
-   attest_entry_created(record.clone(), false)?;
+   attest_link(link, StateChange::Create(false), ValidatedBy::Network)?;
+   attest_entry_created(record.clone(), ValidatedBy::Network, false)?;
    ///
    Ok(Some((record.action_address().to_owned(), profile)))
 }
@@ -128,8 +128,19 @@ pub fn find_profile_from_local(agent_pub_key: AgentPubKey) -> ExternResult<Optio
       return Ok(None);
    };
    ///
-   attest_link(link, StateChange::Create(false))?;
-   attest_entry_created(record.clone(), false)?;
+   let me = agent_info()?.agent_initial_pubkey;
+   if record.action().author() == &me {
+      let link_validation = if link.author != me {
+         ValidatedBy::None
+      } else {
+         determine_validation(&link.create_link_hash)
+      };
+      attest_link(link.clone(), StateChange::Create(false), link_validation)?;
+      attest_entry_created(record.clone(), determine_record_validation(record.clone(), &me), false)?;
+   } else {
+      attest_link(link, StateChange::Create(false), ValidatedBy::Network)?;
+      attest_entry_created(record.clone(), ValidatedBy::Network, false)?;
+   }
    ///
    Ok(Some((record.action_address().to_owned(), profile)))
 }
@@ -188,7 +199,7 @@ pub fn probe_profiles(strategy: GetStrategy) -> ExternResult<()> {
       }
    }
    ///
-   attest_links(links)?;
+   attest_links(links, ValidatedBy::Network)?;
    ///
    Ok(())
 }

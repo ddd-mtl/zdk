@@ -4,11 +4,13 @@ use hdk::prelude::*;
 /// Attest all entries of a given entry type in the local source-chain
 pub fn attest_all_local_typed<R: TryFrom<Entry>>(entry_type: EntryType) -> ExternResult<()> {
    let tuples = query_all_entry(entry_type)?;
+   let me = agent_info()?.agent_initial_pubkey;
    /// Form signal
    let pulses = tuples
       .into_iter()
       .map(|(record, _entry)| {
-         let entry_pulse = EntryPulse::try_from_new_record(record, ValidatedBy::Me, false).unwrap();
+         let validation = determine_record_validation(record.clone(), &me);
+         let entry_pulse = EntryPulse::try_from_new_record(record, validation, false).unwrap();
          return ZomeSignalProtocol::Entry(entry_pulse);
       })
       .collect();

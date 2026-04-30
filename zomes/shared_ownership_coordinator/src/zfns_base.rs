@@ -81,7 +81,7 @@ pub fn probe_shareds(strategy: GetStrategy) -> ExternResult<Vec<ActionHash>> {
       strategy,
    )?;
    /// Emit signal
-   attest_links(links.clone())?;
+   attest_links(links.clone(), ValidatedBy::Network)?;
    /// Done
    let shareds: Vec<ActionHash> = links
       .into_iter()

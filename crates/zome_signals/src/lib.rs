@@ -11,5 +11,5 @@ pub use emit_signal::*;
 pub use entry_pulse::*;
 pub use query::*;
 pub use signal_protocols::*;
-pub(crate) use utils::*;
+pub use utils::*;
 pub use zfn::*;
