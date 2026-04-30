@@ -1,6 +1,7 @@
 use hdk::prelude::*;
 
 pub mod get_input_types;
+pub mod receipts;
 
 #[hdk_extern]
 fn get_zome_info(_: ()) -> ExternResult<ZomeInfo> {
@@ -46,7 +47,7 @@ pub fn get_record_from_network(hash: AnyDhtHash) -> ExternResult<Option<Record>>
 ///
 #[hdk_extern]
 pub fn get_ah_from_local(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
-   debug!("get_ah() {}", eh);
+   debug!("get_ah_from_local() {}", eh);
    let maybe_record = get(eh, GetOptions::local())?;
    let Some(record) = maybe_record else { return Ok(None) };
    Ok(Some(record.action_address().to_owned()))
@@ -55,7 +56,7 @@ pub fn get_ah_from_local(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
 ///
 #[hdk_extern]
 pub fn get_ah_from_network(eh: EntryHash) -> ExternResult<Option<ActionHash>> {
-   debug!("get_ah() {}", eh);
+   debug!("get_ah_from_network() {}", eh);
    let maybe_record = get(eh, GetOptions::network())?;
    let Some(record) = maybe_record else { return Ok(None) };
    Ok(Some(record.action_address().to_owned()))
