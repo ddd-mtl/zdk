@@ -2,7 +2,7 @@ use hdk::map_extern::ExternResult;
 use hdk::prelude::*;
 
 /// ValidationStatus
-#[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes)]
+#[derive(Clone, Debug, Serialize, Deserialize, SerializedBytes, Eq, PartialEq)]
 pub enum ValidatedBy {
    None,    // Untrusted, e.g. received remotely from another agent via a signal
    Me,      // I committed the action
