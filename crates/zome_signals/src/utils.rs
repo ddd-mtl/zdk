@@ -55,25 +55,35 @@ pub fn determine_validation(ah: &ActionHash) -> ValidatedBy {
    let receipts = get_validation_receipts(GetValidationReceiptsInput::new(ah.clone()));
    match receipts {
       Ok(receipts) => {
-         let maybe_record_receipts: Option<&ValidationReceiptSet> =
-            receipts.iter().find(|receipt_set| receipt_set.op_type == "StoreRecord");
-         if let Some(record_receipts) = maybe_record_receipts {
-            if record_receipts.receipts_complete {
-               ValidatedBy::Network
-            } else {
-               let count = record_receipts
-                  .receipts
-                  .iter()
-                  .filter(|receipt| receipt.validation_status == ValidationStatus::Valid)
-                  .count();
-               if count == 0 { ValidatedBy::Me } else { ValidatedBy::Peer }
-            }
+         let Some(record_receipts) = receipts.iter().find(|receipt_set| receipt_set.op_type == "StoreRecord") else {
+            return ValidatedBy::Me;
+         };
+         debug!(
+            "determine_validation() found receipts: {} ; complete: {}",
+            record_receipts.receipts.len(),
+            record_receipts.receipts_complete
+         );
+         if record_receipts.receipts_complete {
+            ValidatedBy::Network
          } else {
-            ValidatedBy::Me
+            let maybe_valid = record_receipts
+               .receipts
+               .iter()
+               .find(|receipt| receipt.validation_status == ValidationStatus::Valid);
+            debug!(
+               "determine_validation() has_valid: {} ; {}",
+               record_receipts.receipts.len(),
+               maybe_valid.is_some()
+            );
+            if maybe_valid.is_some() {
+               ValidatedBy::Peer
+            } else {
+               ValidatedBy::Me
+            }
          }
       },
       Err(e) => {
-         error!("determineValidation() failed: {:?}", e);
+         error!("determine_validation() failed: {:?}", e);
          ValidatedBy::Me
       },
    }
