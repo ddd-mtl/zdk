@@ -115,10 +115,39 @@ impl EntryPulse {
          ah: delete_hashed.hash.to_owned(),
          ts: delete_action.timestamp(),
          author: delete_action.author().clone(),
-         eh: create.entry_hash.clone(),
+         eh: delete.deletes_entry_address.clone(),
          def: def.to_owned(),
          validation,
          bytes,
+         state: StateChange::Delete(is_new),
+      })
+   }
+
+   /// `entry_type` must be the type that is deleted.
+   /// Returned `bytes` field will be empty.
+   pub fn try_with_delete_action_no_bytes(
+      delete_hashed: ActionHashed,
+      entry_type: EntryType,
+      validation: ValidatedBy,
+      is_new: bool,
+   ) -> ExternResult<Self> {
+      let delete_action = delete_hashed.content;
+      let Action::Delete(delete) = delete_action.clone() else {
+         return Err(wasm_error!("Action must be a Delete"));
+      };
+      let EntryType::App(def) = entry_type else {
+         return Err(wasm_error!("entry_type is not an App type"));
+      };
+
+      Ok(Self {
+         orig_ah: Some(delete.deletes_address),
+         ah: delete_hashed.hash.to_owned(),
+         ts: delete_action.timestamp(),
+         author: delete_action.author().clone(),
+         eh: delete.deletes_entry_address.clone(),
+         def: def.to_owned(),
+         validation,
+         bytes: AppEntryBytes::try_from(SerializedBytes::default()).unwrap(),
          state: StateChange::Delete(is_new),
       })
    }
