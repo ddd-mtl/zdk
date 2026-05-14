@@ -106,16 +106,16 @@ pub fn get_latest_time_indexed_links(
          let children = tp_children(&current_sweep_tp, strategy)?;
 
          /// DEBUG INFO
-         let _raw_children_dbg_info = children
-            .iter()
-            .map(|l| {
-               format!(
-                  "{{ tag: \"{}\" timestamp: {:?} }}, ",
-                  compTag2str(&l.tag).unwrap_or("<failed>".to_string()),
-                  l.timestamp
-               )
-            })
-            .collect::<String>();
+         // let _raw_children_dbg_info = children
+         //    .iter()
+         //    .map(|l| {
+         //       format!(
+         //          "{{ tag: \"{}\" timestamp: {:?} }}, ",
+         //          compTag2str(&l.tag).unwrap_or("<failed>".to_string()),
+         //          l.timestamp
+         //       )
+         //    })
+         //    .collect::<String>();
 
          /// Remove children later than latest time value
          let mut older_children_pairs: Vec<(TypedPath, i32, Link)> = children
