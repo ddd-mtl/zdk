@@ -41,7 +41,7 @@ pub fn get_latest_time_indexed_links(
    let mut has_probed_prev = false;
 
    /// Grab links from the latest time-index hour
-   if tp_exists(&latest_hour_tp, strategy)? {
+   if latest_hour_tp.clone().with_strategy(strategy).exists()? {
       let latest_hour_us = convert_timepath_to_timestamp(latest_hour_tp.path.clone())?;
       let mut lquery = LinkQuery::new(
          latest_hour_tp.path_entry_hash()?,
@@ -60,7 +60,7 @@ pub fn get_latest_time_indexed_links(
       /// in order to not get stuck in the same bucket forever
       if total_items.len() >= items_limit {
          has_probed_prev = true;
-         if tp_exists(&prev_hour_tp, strategy)? {
+         if prev_hour_tp.clone().with_strategy(strategy).exists()? {
             let mut lquery = LinkQuery::new(
                prev_hour_tp.path_entry_hash()?,
                LinkTypeFilter::single_dep(root_anchor_tp.link_type.zome_index),
@@ -89,7 +89,7 @@ pub fn get_latest_time_indexed_links(
          timepath2anchor(&current_sweep_tp),
          total_items.len()
       );
-      if tp_exists(&current_sweep_tp, strategy)? {
+      if current_sweep_tp.clone().with_strategy(strategy).exists()? {
          let oldest_probed_leaf_i32 = get_timepath_leaf_value(&oldest_probed_tp).unwrap();
 
          let latest_probed_time_us = convert_timepath_to_timestamp(oldest_probed_tp.path.clone()).unwrap();

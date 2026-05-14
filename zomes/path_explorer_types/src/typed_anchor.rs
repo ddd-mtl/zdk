@@ -43,6 +43,7 @@ impl TypedAnchor {
             zome_type: LinkType::from(self.link_index),
          },
          path: Path::from(self.anchor.clone()),
+         strategy: GetStrategy::Local,
       }
    }
 

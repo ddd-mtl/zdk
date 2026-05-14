@@ -11,15 +11,15 @@ license.workspace = true
 workspace = true
 
 [lib]
-crate-type = [ "cdylib", "rlib" ]
+crate-type = ["cdylib", "rlib"]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 serde.workspace = true
 holochain.workspace = true
 
-colored = { version = "2.0", default-features = false }
+colored = { version = "3.0", default-features = false }
 futures = { version = "0.3", default-features = false }
-tokio = { version = "1.0", features = [ "full" ] }
+tokio = { version = "1.0", features = ["full"] }
 once_cell = { version = "1.13", default-features = false }
 stream-cancel = { version = "0.8.0", default-features = false }
 

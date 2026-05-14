@@ -1,3 +1,5 @@
+use base64::Engine;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use hdi::hash_path::path::{Component, DELIMITER};
 use hdk::prelude::holo_hash::{HashType, holo_hash_decode_unchecked, holo_hash_encode};
 use hdk::prelude::*;
@@ -33,8 +35,10 @@ pub fn hash2comp<T: HashType>(hash: HoloHash<T>) -> Component {
 /// so we are doing the decoding manually without the checksum check here.
 pub fn comp2appletHash(comp: &Component) -> ExternResult<EntryHash> {
    let hash_str = String::try_from(comp).map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;
-   let str = &hash_str[1..]; //remove the starting 'u' char added during string::try_from()
-   let raw_hash = base64::decode_config(str, base64::URL_SAFE_NO_PAD)
+   let str = &hash_str[1..]; // remove the starting 'u' char added during string::try_from()
+
+   let raw_hash = URL_SAFE_NO_PAD
+      .decode(str)
       .map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;
    let eh = EntryHash::try_from_raw_39(raw_hash)
       .map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;

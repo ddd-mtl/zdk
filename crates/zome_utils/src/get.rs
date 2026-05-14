@@ -233,7 +233,7 @@ pub fn get_latest_entry(target: EntryHash, options: GetOptions) -> ExternResult<
       })
       .expect("updates are not empty");
    let eh = sah.action().entry_hash().unwrap();
-   let record = get_record(AnyDhtHash::from(eh.to_owned()), options.strategy)?;
+   let record = get_record(AnyDhtHash::from(eh.to_owned()), options.strategy())?;
    Ok(record.entry.into_option())
 }
 
