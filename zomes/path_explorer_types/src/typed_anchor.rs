@@ -2,7 +2,7 @@ use crate::*;
 use hdk::prelude::*;
 
 /// Struct for holding an easily exportable typed Anchor.
-/// A Typed Anchor is an Anchor with LinkType associated with it.
+/// A Typed Anchor is an Anchor with a LinkType associated with it.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TypedAnchor {
@@ -43,7 +43,7 @@ impl TypedAnchor {
             zome_type: LinkType::from(self.link_index),
          },
          path: Path::from(self.anchor.clone()),
-         strategy: GetStrategy::Local,
+         strategy: GetStrategy::Local, // Local is safer than default
       }
    }
 
