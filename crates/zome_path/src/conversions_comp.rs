@@ -12,6 +12,9 @@ pub fn path2anchor(path: &Path) -> Result<String, SerializedBytesError> {
       res.push_str(String::try_from(comp)?.as_str());
       res.push_str(DELIMITER);
    }
+   if res.ends_with(DELIMITER) {
+      res.pop();
+   }
    Ok(res)
 }
 
@@ -122,7 +125,7 @@ mod tests {
       let res = anchor.split(DELIMITER).collect::<Vec<&str>>();
       //println!("comp: {:?}", comp);
       //println!("res: {:?}", res);
-      assert_eq!(res.len(), 3);
+      assert_eq!(res.len(), 2);
       //assert_eq!(res[0].as_bytes(), comp.as_ref());
       //assert_eq!(res[1].as_bytes(), comp2.as_ref());
 
@@ -131,6 +134,26 @@ mod tests {
 
       assert_eq!(decoded_hash, hash);
       assert_eq!(decoded_hash2, hash2);
+   }
+
+   #[test]
+   fn path2anchor_one() {
+      let path: Path = vec![Component::from("all")].into();
+      assert_eq!(path2anchor(&path).unwrap(), "all");
+   }
+
+   #[test]
+   fn path2anchor_many_components() {
+      let path: Path = vec![
+         Component::from("all"),
+         Component::from("global"),
+         Component::from("2023"),
+         Component::from("4"),
+         Component::from("13"),
+         Component::from("12"),
+      ]
+      .into();
+      assert_eq!(path2anchor(&path).unwrap(), "all.global.2023.4.13.12");
    }
 
    // TODO: Figure out how to test compTag2str() & compTag2tag()

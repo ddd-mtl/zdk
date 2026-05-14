@@ -1,7 +1,7 @@
 use crate::*;
 
-/// Index an Item according to given time and root TypedPath
-/// Returns the LeafAnchor and ActionHash of the created link
+/// Index an Item according to a given time and root TypedPath.
+/// Returns the LeafAnchor and ActionHash of the created link.
 pub fn index_item(
    root_tp: TypedPath,
    item_hash: AnyLinkableHash,

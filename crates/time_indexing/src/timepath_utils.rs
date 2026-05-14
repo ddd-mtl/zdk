@@ -158,3 +158,137 @@ pub fn convert_timepath_to_timestamp(path: Path) -> ExternResult<Timestamp> {
    let ts = Timestamp::from_micros(dtc.timestamp_micros());
    Ok(ts)
 }
+
+#[cfg(test)]
+mod tests {
+   use super::*;
+   use chrono::DateTime;
+
+   fn timestamp_from_rfc3339(value: &str) -> Timestamp {
+      let dt = DateTime::parse_from_rfc3339(value).unwrap();
+      Timestamp::from_micros(dt.timestamp_micros())
+   }
+
+   #[test]
+   fn convert_component_to_i32_returns_number_for_numeric_component() {
+      let component: Component = "42".into();
+      let result = convert_component_to_i32(&component).unwrap();
+      assert_eq!(result, 42);
+
+      let component: Component = "0".into();
+      let result = convert_component_to_i32(&component).unwrap();
+      assert_eq!(result, 0);
+
+      let component: Component = "-42".into();
+      let result = convert_component_to_i32(&component).unwrap();
+      assert_eq!(result, -42);
+
+      let component: Component = "00420".into();
+      let result = convert_component_to_i32(&component).unwrap();
+      assert_eq!(result, 420);
+   }
+
+   #[test]
+   fn convert_component_to_i32_returns_error_for_non_numeric_component() {
+      let component: Component = "not-a-number".into();
+      let result = convert_component_to_i32(&component);
+      assert!(result.is_err());
+
+      let component: Component = "".into();
+      let result = convert_component_to_i32(&component);
+      assert!(result.is_err());
+
+      let component: Component = "42-".into();
+      let result = convert_component_to_i32(&component);
+      assert!(result.is_err());
+
+      let component: Component = "--42".into();
+      let result = convert_component_to_i32(&component);
+      assert!(result.is_err());
+   }
+
+   #[test]
+   fn ts2timepath_converts_timestamp_to_year_month_day_hour_path() {
+      let timestamp = timestamp_from_rfc3339("2023-04-13T12:34:56Z");
+      let path = ts2timepath(timestamp);
+      assert_eq!(path2anchor(&path).unwrap(), "2023.4.13.12");
+   }
+
+   #[test]
+   fn trim_to_timepath_keeps_only_numeric_components() {
+      let path: Path = vec![
+         Component::from("all"),
+         Component::from("global"),
+         Component::from("2023"),
+         Component::from("4"),
+         Component::from("13"),
+         Component::from("12"),
+      ]
+      .into();
+
+      let trimmed = trim_to_timepath(&path).unwrap();
+      assert_eq!(path2anchor(&trimmed).unwrap(), "2023.4.13.12");
+   }
+
+   #[test]
+   fn trim_to_timepath_returns_error_when_no_numeric_components_exist() {
+      let path: Path = vec![Component::from("all"), Component::from("global")].into();
+      let result = trim_to_timepath(&path);
+      assert!(result.is_err());
+   }
+
+   #[test]
+   fn trim_to_timepath_returns_error_when_too_many_numeric_components_exist() {
+      let path: Path = vec![
+         Component::from("2023"),
+         Component::from("4"),
+         Component::from("13"),
+         Component::from("12"),
+         Component::from("30"),
+      ]
+      .into();
+      let result = trim_to_timepath(&path);
+      assert!(result.is_err());
+   }
+
+   #[test]
+   fn convert_timepath_to_timestamp_defaults_missing_month_day_and_hour() {
+      let path: Path = vec![Component::from("2023")].into();
+      let timestamp = convert_timepath_to_timestamp(path).unwrap();
+      assert_eq!(timestamp, timestamp_from_rfc3339("2023-01-01T00:00:00Z"));
+   }
+
+   #[test]
+   fn convert_timepath_to_timestamp_converts_full_timepath() {
+      let path: Path = vec![
+         Component::from("2023"),
+         Component::from("4"),
+         Component::from("13"),
+         Component::from("12"),
+      ]
+      .into();
+      let timestamp = convert_timepath_to_timestamp(path).unwrap();
+      assert_eq!(timestamp, timestamp_from_rfc3339("2023-04-13T12:00:00Z"));
+   }
+
+   #[test]
+   fn get_previous_hour_timestamp_subtracts_one_hour() {
+      let timestamp = timestamp_from_rfc3339("2023-04-13T12:00:00Z");
+      let previous = get_previous_hour_timestamp(timestamp).unwrap();
+      assert_eq!(previous, timestamp_from_rfc3339("2023-04-13T11:00:00Z"));
+   }
+
+   #[test]
+   fn get_previous_hour_timestamp_subtracts_one_hour_2() {
+      let timestamp = timestamp_from_rfc3339("2023-04-01T00:00:00Z");
+      let previous = get_previous_hour_timestamp(timestamp).unwrap();
+      assert_eq!(previous, timestamp_from_rfc3339("2023-03-31T23:00:00Z"));
+   }
+
+   #[test]
+   fn get_previous_hour_timestamp_subtracts_one_hour_3() {
+      let timestamp = timestamp_from_rfc3339("2023-04-13T12:12:34Z");
+      let previous = get_previous_hour_timestamp(timestamp).unwrap();
+      assert_eq!(previous, timestamp_from_rfc3339("2023-04-13T11:12:34Z"));
+   }
+}
