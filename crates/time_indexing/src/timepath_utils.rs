@@ -20,16 +20,6 @@ pub fn get_timepath_leaf_value(path: &Path) -> ExternResult<i32> {
    return convert_component_to_i32(component);
 }
 
-// ///
-// pub fn convert_component_to_i32(component: &Component) -> ExternResult<i32> {
-//   let bytes: [u8; 4] = component
-//     .as_ref()
-//     .try_into()
-//     .map_err(|e: TryFromSliceError| wasm_error!(e))
-//     ?;
-//   Ok(i32::from_be_bytes(bytes))
-// }
-
 ///
 pub fn convert_component_to_i32(component: &Component) -> ExternResult<i32> {
    //debug!("convert_component_to_i32() {:?}", component);
