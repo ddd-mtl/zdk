@@ -120,9 +120,9 @@ pub fn get_latest_time_indexed_links(
          /// Remove children later than latest time value
          let mut older_children_pairs: Vec<(TypedPath, i32, Link)> = children
             .into_iter()
-            .filter_map(|l| get_component_from_link_tag(&l).ok().map(|c| (c, l))) // filter out non-path links
+            .filter_map(|l| link2comp(&l).ok().map(|c| (c, l))) // filter out non-path links
             .map(|(c, l)| {
-               let tuple = (current_sweep_tp.clone(), convert_component_to_i32(&c)?, l);
+               let tuple = (current_sweep_tp.clone(), comp2i32(&c)?, l);
                Ok(tuple)
             })
             .collect::<Result<Vec<_>, WasmError>>()?;
@@ -253,12 +253,12 @@ fn sweep_and_append(
 
          let grandchildren_pairs = grandchildren
             .into_iter()
-            .filter_map(|l| get_component_from_link_tag(&l).ok().map(|c| (c, l))) // filter out non-path links
+            .filter_map(|l| link2comp(&l).ok().map(|c| (c, l))) // filter out non-path links
             .map(|(c, l)| {
                let mut leaft_tp = parent_tp.clone();
                let comp = Component::from(format!("{}", compi32));
                leaft_tp.path.append_component(comp.clone());
-               let tuple = (leaft_tp, convert_component_to_i32(&c)? /* compi32*/, l);
+               let tuple = (leaft_tp, comp2i32(&c)? /* compi32*/, l);
                Ok(tuple)
             })
             .collect::<Result<Vec<_>, WasmError>>()?;

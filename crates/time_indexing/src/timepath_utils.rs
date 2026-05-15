@@ -5,7 +5,7 @@ use hdk::prelude::*;
 use zome_path::*;
 
 ///
-pub fn get_component_from_link_tag(link: &Link) -> Result<Component, SerializedBytesError> {
+pub fn link2comp(link: &Link) -> Result<Component, SerializedBytesError> {
    SerializedBytes::from(UnsafeBytes::from(link.tag.clone().into_inner())).try_into()
 }
 
@@ -17,22 +17,7 @@ pub fn get_previous_hour_timestamp(time: Timestamp) -> Result<Timestamp, Timesta
 ///
 pub fn get_timepath_leaf_value(path: &Path) -> ExternResult<i32> {
    let component = path.leaf().unwrap();
-   return convert_component_to_i32(component);
-}
-
-///
-pub fn convert_component_to_i32(component: &Component) -> ExternResult<i32> {
-   //debug!("convert_component_to_i32() {:?}", component);
-   let Ok(str) = String::try_from(component) else {
-      return Err(wasm_error!(WasmErrorInner::Guest(
-         "Failed to convert Component to string".to_string()
-      )));
-   };
-   //let str = std::str::from_utf8(component.as_ref()).unwrap();
-   let Ok(number) = str.parse::<i32>() else {
-      return Err(wasm_error!(WasmErrorInner::Guest("Component is not i32".to_string())));
-   };
-   Ok(number)
+   return comp2i32(component);
 }
 
 /// Convert timestamp to timepath
@@ -62,7 +47,7 @@ pub fn get_time_path(tp: TypedPath, time: Timestamp) -> ExternResult<TypedPath> 
    components.push((dtc.day() as i32).to_string().into());
    components.push((dtc.hour() as i32).to_string().into());
 
-   let tp = TypedPath::new(tp.link_type, components.into());
+   let tp = TypedPath::new(tp.link_type, components.into()).with_strategy(GetStrategy::Local); // TODO: should be tp.strategy, but too error prone
 
    // let ts2 = convert_time_path_to_timestamp(tp.path.clone())?;
    // debug!("get_time_path() {} -> {} == {} ? | ", ts.as_seconds_and_nanos().0, time.as_seconds_and_nanos().0, ts2.as_seconds_and_nanos().0);
@@ -86,6 +71,7 @@ pub fn ts2anchor(ts: Timestamp) -> String {
    return path2anchor(&path).unwrap();
 }
 
+/// Remove starting non-numeric components from a timepath.
 /// Possible input:
 ///  - 2023
 ///  - 2023.4.13.12
@@ -96,7 +82,7 @@ pub fn trim_to_timepath(path: &Path) -> ExternResult<Path> {
 
    let mut time_comps: Vec<Component> = Vec::new();
    for comp in components {
-      if let Ok(_) = convert_component_to_i32(comp) {
+      if let Ok(_) = comp2i32(comp) {
          time_comps.push(comp.clone());
       }
    }
@@ -120,22 +106,10 @@ pub fn convert_timepath_to_timestamp(path: Path) -> ExternResult<Timestamp> {
 
    let len = time_comps.len();
 
-   let year = convert_component_to_i32(&time_comps[0])?;
-   let month = if len > 1 {
-      convert_component_to_i32(&time_comps[1])?
-   } else {
-      1
-   };
-   let day = if len > 2 {
-      convert_component_to_i32(&time_comps[2])?
-   } else {
-      1
-   };
-   let hour = if len > 3 {
-      convert_component_to_i32(&time_comps[3])?
-   } else {
-      0
-   };
+   let year = comp2i32(&time_comps[0])?;
+   let month = if len > 1 { comp2i32(&time_comps[1])? } else { 1 };
+   let day = if len > 2 { comp2i32(&time_comps[2])? } else { 1 };
+   let hour = if len > 3 { comp2i32(&time_comps[3])? } else { 0 };
 
    //debug!("convert_timepath_to_timestamp() {}-{}-{} {}", year, month, day, hour);
 
@@ -157,44 +131,6 @@ mod tests {
    fn timestamp_from_rfc3339(value: &str) -> Timestamp {
       let dt = DateTime::parse_from_rfc3339(value).unwrap();
       Timestamp::from_micros(dt.timestamp_micros())
-   }
-
-   #[test]
-   fn convert_component_to_i32_returns_number_for_numeric_component() {
-      let component: Component = "42".into();
-      let result = convert_component_to_i32(&component).unwrap();
-      assert_eq!(result, 42);
-
-      let component: Component = "0".into();
-      let result = convert_component_to_i32(&component).unwrap();
-      assert_eq!(result, 0);
-
-      let component: Component = "-42".into();
-      let result = convert_component_to_i32(&component).unwrap();
-      assert_eq!(result, -42);
-
-      let component: Component = "00420".into();
-      let result = convert_component_to_i32(&component).unwrap();
-      assert_eq!(result, 420);
-   }
-
-   #[test]
-   fn convert_component_to_i32_returns_error_for_non_numeric_component() {
-      let component: Component = "not-a-number".into();
-      let result = convert_component_to_i32(&component);
-      assert!(result.is_err());
-
-      let component: Component = "".into();
-      let result = convert_component_to_i32(&component);
-      assert!(result.is_err());
-
-      let component: Component = "42-".into();
-      let result = convert_component_to_i32(&component);
-      assert!(result.is_err());
-
-      let component: Component = "--42".into();
-      let result = convert_component_to_i32(&component);
-      assert!(result.is_err());
    }
 
    #[test]

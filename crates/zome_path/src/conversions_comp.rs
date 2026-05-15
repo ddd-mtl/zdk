@@ -19,6 +19,21 @@ pub fn path2anchor(path: &Path) -> Result<String, SerializedBytesError> {
 }
 
 ///
+pub fn comp2i32(component: &Component) -> ExternResult<i32> {
+   //debug!("convert_component_to_i32() {:?}", component);
+   let Ok(str) = String::try_from(component) else {
+      return Err(wasm_error!(WasmErrorInner::Guest(
+         "Failed to convert Component to string".to_string()
+      )));
+   };
+   //let str = std::str::from_utf8(component.as_ref()).unwrap();
+   let Ok(number) = str.parse::<i32>() else {
+      return Err(wasm_error!(WasmErrorInner::Guest("Component is not i32".to_string())));
+   };
+   Ok(number)
+}
+
+///
 pub fn comp2hash<T: HashType>(comp: &Component) -> ExternResult<HoloHash<T>> {
    let hash_str = String::try_from(comp).map_err(|e| wasm_error!(SerializedBytesError::Deserialize(e.to_string())))?;
    let raw_hash = holo_hash_decode_unchecked(&hash_str)
@@ -154,6 +169,44 @@ mod tests {
       ]
       .into();
       assert_eq!(path2anchor(&path).unwrap(), "all.global.2023.4.13.12");
+   }
+
+   #[test]
+   fn convert_component_to_i32_returns_number_for_numeric_component() {
+      let component: Component = "42".into();
+      let result = comp2i32(&component).unwrap();
+      assert_eq!(result, 42);
+
+      let component: Component = "0".into();
+      let result = comp2i32(&component).unwrap();
+      assert_eq!(result, 0);
+
+      let component: Component = "-42".into();
+      let result = comp2i32(&component).unwrap();
+      assert_eq!(result, -42);
+
+      let component: Component = "00420".into();
+      let result = comp2i32(&component).unwrap();
+      assert_eq!(result, 420);
+   }
+
+   #[test]
+   fn convert_component_to_i32_returns_error_for_non_numeric_component() {
+      let component: Component = "not-a-number".into();
+      let result = comp2i32(&component);
+      assert!(result.is_err());
+
+      let component: Component = "".into();
+      let result = comp2i32(&component);
+      assert!(result.is_err());
+
+      let component: Component = "42-".into();
+      let result = comp2i32(&component);
+      assert!(result.is_err());
+
+      let component: Component = "--42".into();
+      let result = comp2i32(&component);
+      assert!(result.is_err());
    }
 
    // TODO: Figure out how to test compTag2str() & compTag2tag()
