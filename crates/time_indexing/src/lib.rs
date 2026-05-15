@@ -16,14 +16,14 @@ pub use timepath_utils::*;
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SweepResponse {
-   pub sweeped_interval: SweepInterval, // From begin-bucket start time to end-bucket finish time.
+   pub swept_interval: SweepInterval, // From begin-bucket start time to end-bucket finish time.
    pub found_items: Vec<(Timestamp, ItemLink)>, // Bucket start time
 }
 
 impl SweepResponse {
-   pub fn new(sweeped_interval: SweepInterval, found_items: Vec<(Timestamp, ItemLink)>) -> Self {
+   pub fn new(swept_interval: SweepInterval, found_items: Vec<(Timestamp, ItemLink)>) -> Self {
       Self {
-         sweeped_interval,
+         swept_interval,
          found_items,
       }
    }
