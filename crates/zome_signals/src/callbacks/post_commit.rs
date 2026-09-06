@@ -11,9 +11,9 @@ where
    /// Process each Action
    for sah in signed_actions {
       let ah = sah.as_hash().to_owned();
-      match sah.action() {
+      match &sah.action().data {
          ///
-         Action::CreateLink(create_link) => {
+         ActionData::CreateLink(create_link) => {
             /// Get LinkType
             match L::from_type(create_link.zome_index, create_link.link_type) {
                Ok(Some(_link_type)) => (),
@@ -33,7 +33,7 @@ where
                },
             };
             /// Emit Link Signal
-            let res = attest_link_created(ah, create_link, ValidatedBy::Me, true);
+            let res = attest_link_created(ah, sah.action(), ValidatedBy::Me, true);
             if let Err(e) = &res {
                error!("Emitting CreateLink signal failed: {:?}", e);
             }
@@ -44,17 +44,17 @@ where
             });
          },
          ///
-         Action::DeleteLink(delete_link) => {
+         ActionData::DeleteLink(delete_link) => {
             let Ok(Some(record)) = get(delete_link.link_add_address.clone(), GetOptions::local()) else {
                error!("Failed to get CreateLink action");
                continue;
             };
-            let Action::CreateLink(create_link) = record.action() else {
+            let ActionData::CreateLink(create_link) = &record.action().data else {
                error!("Record should be a CreateLink");
                continue;
             };
             /// Emit Link Signal
-            let res = attest_link_deleted(delete_link, create_link, ValidatedBy::Me, true);
+            let res = attest_link_deleted(sah.action(), record.action(), ValidatedBy::Me, true);
             if let Err(e) = &res {
                error!("Emitting DeleteLink signal failed: {:?}", e);
             }
@@ -65,7 +65,7 @@ where
             });
          },
          /// NewEntryAction
-         Action::Update(_) | Action::Create(_) => {
+         ActionData::Update(_) | ActionData::Create(_) => {
             let EntryType::App(app_entry_def) = sah.action().entry_type().unwrap() else {
                continue;
             };
@@ -85,7 +85,7 @@ where
             }
          },
          /// DeleteAction
-         Action::Delete(delete) => {
+         ActionData::Delete(delete) => {
             let Ok(new_sah) = must_get_action(delete.deletes_address.clone()) else {
                error!("Deleted action not found.");
                continue;
@@ -102,7 +102,7 @@ where
                error!("Deleted action should have entry_type.");
                continue;
             };
-            let create_record = Record::new(create_sah.clone(), Some(create_entry.content));
+            let create_record = Record::new(create_sah.clone(), RecordEntry::Present(create_entry.content));
             /// Emit Entry Signal
             let result = attest_entry_deleted(sah.hashed.clone(), create_record, ValidatedBy::Me, true);
             /// Emit System Signal

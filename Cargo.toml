@@ -32,12 +32,12 @@ unused_attributes = "allow"
 [workspace.dependencies]
 serde = { version = "=1.0.228", default-features = false }
 holochain_serialized_bytes = "=0.0.57"
-hdi = { version = "=0.7.1", default-features = false }
-hdk = { version = "=0.6.1", default-features = false }
-holo_hash = { version = "0.6.1", features = ["encoding", "serialization"], default-features = false }
+hdi = { version = "=0.8.0", default-features = false, features = ["trace"] }
+hdk = { version = "=0.7.0", default-features = false }
+holo_hash = { version = "0.7.0", features = ["encoding", "serialization"], default-features = false }
 #holochain = { version = "=0.6.0-rc.0", features = ["test_utils"] }
 
-hc_zome_profiles_integrity = { git = "https://github.com/holochain-open-dev/profiles", branch = "main-0.6" }
+hc_zome_profiles_integrity = { git = "https://github.com/holochain-open-dev/profiles", tag = "v0.700.0" }
 
 
 [profile.dev]

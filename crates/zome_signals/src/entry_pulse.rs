@@ -59,13 +59,13 @@ impl EntryPulse {
 
    /// Can't do delete here since it does not hold the entry data
    pub fn try_from_new_record(record: Record, validation: ValidatedBy, is_new: bool) -> ExternResult<Self> {
-      let state = match record.action() {
-         Action::Create(_) => StateChange::Create(is_new),
-         Action::Update(_) => StateChange::Update(is_new),
+      let state = match &record.action().data {
+         ActionData::Create(_) => StateChange::Create(is_new),
+         ActionData::Update(_) => StateChange::Update(is_new),
          _ => return Err(wasm_error!("Unhandled Action type")),
       };
-      let orig_ah = match record.action() {
-         Action::Update(update) => Some(update.original_action_address.clone()),
+      let orig_ah = match &record.action().data {
+         ActionData::Update(update) => Some(update.original_action_address.clone()),
          _ => None,
       };
 
@@ -97,10 +97,10 @@ impl EntryPulse {
       is_new: bool,
    ) -> ExternResult<Self> {
       let delete_action = delete_hashed.content;
-      let Action::Delete(delete) = delete_action.clone() else {
+      let ActionData::Delete(delete) = delete_action.data.clone() else {
          return Err(wasm_error!("Action must be a Delete"));
       };
-      let Action::Create(create) = create_record.action() else {
+      let ActionData::Create(create) = &create_record.action().data else {
          return Err(wasm_error!("Action must be a Create"));
       };
       let RecordEntry::Present(Entry::App(bytes)) = create_record.entry.to_owned() else {
@@ -132,7 +132,7 @@ impl EntryPulse {
       is_new: bool,
    ) -> ExternResult<Self> {
       let delete_action = delete_hashed.content;
-      let Action::Delete(delete) = delete_action.clone() else {
+      let ActionData::Delete(delete) = delete_action.data.clone() else {
          return Err(wasm_error!("Action must be a Delete"));
       };
       let EntryType::App(def) = entry_type else {

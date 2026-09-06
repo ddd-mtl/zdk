@@ -7,11 +7,11 @@ use hdk::prelude::*;
 macro_rules! zome_error {
    ($($arg:tt)*) => { {
          let line_number = line!();
-         let file_name = file!().to_string();
+         let module_name = module_path!().to_string();
          let reason = format!($($arg)*);
          let msg = format!("{} ; Context: {}", reason, zome_utils::dump_context());
          let error = WasmError {
-            file: file_name,
+            module_path: module_name,
             line: line_number,
             error: WasmErrorInner::Guest(msg),
          };
@@ -24,7 +24,7 @@ macro_rules! zome_error {
 pub fn error<T>(reason: &str) -> ExternResult<T> {
    let msg = format!("{} ; Context: {}", reason, dump_context());
    let error = WasmError {
-      file: String::new(),
+      module_path: String::new(),
       line: 0,
       error: WasmErrorInner::Guest(msg),
    };

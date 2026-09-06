@@ -197,10 +197,10 @@ pub fn get_latest_typed_from_eh<T: TryFrom<SerializedBytes, Error = SerializedBy
    let Some(typed_entry) = maybe_maybe_typed_entry.unwrap() else {
       return Ok(None);
    };
-   let ah = match record.action() {
+   let ah = match &record.action().data {
       /// we DO want to return the action for the original instead of the updated
-      Action::Update(update) => update.original_action_address.clone(),
-      Action::Create(_) => record.action_address().clone(),
+      ActionData::Update(update) => update.original_action_address.clone(),
+      ActionData::Create(_) => record.action_address().clone(),
       _ => unreachable!("Can't have returned a action for a nonexistent entry"),
    };
    let eh = record.action().entry_hash().unwrap().to_owned();

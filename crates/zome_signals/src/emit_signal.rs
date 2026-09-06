@@ -53,7 +53,7 @@ pub fn attest_new_entry(sah: SignedActionHashed, validation: ValidatedBy) -> Ext
       return Err(wasm_error!("Action has no Entry"));
    };
    let entry = must_get_entry(eh.to_owned())?.content;
-   let record = Record::new(sah, Some(entry));
+   let record = Record::new(sah, RecordEntry::Present(entry));
    /// Emit Signal
    attest_entry_created(record, validation, true)?;
    Ok(())
@@ -65,12 +65,12 @@ pub fn attest_new_entry(sah: SignedActionHashed, validation: ValidatedBy) -> Ext
 
 ///
 pub fn attest_link_deleted(
-   delete: &DeleteLink,
-   create: &CreateLink,
+   delete: &Action,
+   create: &Action,
    validation: ValidatedBy,
    is_new: bool,
 ) -> ExternResult<()> {
-   let link = link_from_delete(delete, create);
+   let link = link_from_delete(delete, create)?;
    let pulse = LinkPulse {
       link,
       state: StateChange::Delete(is_new),
@@ -82,11 +82,11 @@ pub fn attest_link_deleted(
 ///
 pub fn attest_link_created(
    link_ah: ActionHash,
-   create: &CreateLink,
+   create: &Action,
    validation: ValidatedBy,
    is_new: bool,
 ) -> ExternResult<()> {
-   let link = link_from_create(link_ah, create);
+   let link = link_from_create(link_ah, create)?;
    return emit_zome_signal(vec![ZomeSignalProtocol::Link(LinkPulse {
       link,
       state: StateChange::Create(is_new),
@@ -119,30 +119,40 @@ pub fn attest_links(links: Vec<Link>, validation: ValidatedBy) -> ExternResult<(
    Ok(())
 }
 
-///
-pub fn link_from_create(create_ah: ActionHash, create: &CreateLink) -> Link {
-   Link {
-      author: create.author.clone(),
-      base: create.base_address.clone(),
-      target: create.target_address.clone(),
-      timestamp: create.timestamp,
-      zome_index: create.zome_index,
-      link_type: create.link_type,
-      tag: LinkTag::from(create.tag.clone().into_inner()),
+/// `create` must be a CreateLink Action. Common fields come from its header,
+/// link fields from its `CreateLinkData`.
+pub fn link_from_create(create_ah: ActionHash, create: &Action) -> ExternResult<Link> {
+   let ActionData::CreateLink(create_data) = &create.data else {
+      return Err(wasm_error!("Action is not a CreateLink"));
+   };
+   Ok(Link {
+      author: create.header.author.clone(),
+      base: create_data.base_address.clone(),
+      target: create_data.target_address.clone(),
+      timestamp: create.header.timestamp,
+      zome_index: create_data.zome_index,
+      link_type: create_data.link_type,
+      tag: LinkTag::from(create_data.tag.clone().into_inner()),
       create_link_hash: create_ah,
-   }
+   })
 }
 
-///
-pub fn link_from_delete(delete: &DeleteLink, create: &CreateLink) -> Link {
-   Link {
-      author: delete.author.clone(),
-      base: create.base_address.clone(),
-      target: create.target_address.clone(),
-      timestamp: delete.timestamp,
-      zome_index: create.zome_index,
-      link_type: create.link_type,
-      tag: LinkTag::from(create.tag.clone().into_inner()),
-      create_link_hash: delete.link_add_address.clone(),
-   }
+/// `delete` must be a DeleteLink Action and `create` the CreateLink Action it deletes.
+pub fn link_from_delete(delete: &Action, create: &Action) -> ExternResult<Link> {
+   let ActionData::DeleteLink(delete_data) = &delete.data else {
+      return Err(wasm_error!("Action is not a DeleteLink"));
+   };
+   let ActionData::CreateLink(create_data) = &create.data else {
+      return Err(wasm_error!("Action is not a CreateLink"));
+   };
+   Ok(Link {
+      author: delete.header.author.clone(),
+      base: create_data.base_address.clone(),
+      target: create_data.target_address.clone(),
+      timestamp: delete.header.timestamp,
+      zome_index: create_data.zome_index,
+      link_type: create_data.link_type,
+      tag: LinkTag::from(create_data.tag.clone().into_inner()),
+      create_link_hash: delete_data.link_add_address.clone(),
+   })
 }

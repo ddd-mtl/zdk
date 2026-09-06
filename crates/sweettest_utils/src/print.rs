@@ -50,13 +50,13 @@ fn print_record(record: &SourceChainJsonRecord) -> String {
 
    let entry_names = get_entry_names();
 
-   match &record.action {
-      Action::CreateLink(create_link) => {
+   match &record.action.data {
+      ActionData::CreateLink(create_link) => {
          // let s = std::str::from_utf8(&create_link.tag.0).unwrap();
          let s = String::from_utf8_lossy(&create_link.tag.0).to_string();
          str += &format!("'{:.20}'", s).yellow().to_string();
       },
-      Action::Create(create_entry) => {
+      ActionData::Create(create_entry) => {
          let mut s = String::new();
          match &create_entry.entry_type {
             EntryType::App(app_entry_type) => {
@@ -79,7 +79,7 @@ fn print_record(record: &SourceChainJsonRecord) -> String {
          };
          str += &s;
       },
-      Action::Update(update_entry) => {
+      ActionData::Update(update_entry) => {
          let mut s = String::new();
          match &update_entry.entry_type {
             EntryType::App(app_entry_type) => {
@@ -96,11 +96,11 @@ fn print_record(record: &SourceChainJsonRecord) -> String {
          };
          str += &s.yellow().to_string();
       },
-      Action::DeleteLink(delete_link) => {
+      ActionData::DeleteLink(delete_link) => {
          let s = format!("{}", delete_link.link_add_address);
          str += &format!("'{:.25}'", s).yellow().to_string();
       },
-      Action::Delete(delete_entry) => {
+      ActionData::Delete(delete_entry) => {
          let s = format!("{}", delete_entry.deletes_address);
          str += &format!("'{:.25}'", s).green().to_string();
       }

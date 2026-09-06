@@ -18,7 +18,7 @@ pub fn get_all_CapGrants() -> ExternResult<Vec<CapGrant>> {
       let RecordEntry::Present(entry) = record.entry() else {
          return zome_error!("Could not convert record");
       };
-      let Action::Create(_create) = record.action() else {
+      let ActionData::Create(_create) = &record.action().data else {
          panic!("Should be a create Action")
       };
       let Some(grant) = entry.as_cap_grant() else {
@@ -30,10 +30,12 @@ pub fn get_all_CapGrants() -> ExternResult<Vec<CapGrant>> {
    Ok(grants)
 }
 
-/// Return vec of typed entries of given entry type found in local source chain
+/// Return vec of typed entries of given entry type found in local source chain.
+/// Yields the full `Action` rather than its `CreateData`, so callers can reach both the
+/// header (author/timestamp) and the variant data.
 pub fn get_all_typed_from_source_chain<R: TryFrom<Entry>>(
    entry_type: EntryType,
-) -> ExternResult<Vec<(ActionHash, Create, R)>> {
+) -> ExternResult<Vec<(ActionHash, Action, R)>> {
    /// Query type
    let query_args = ChainQueryFilter::default()
       .include_entries(true)
@@ -44,10 +46,14 @@ pub fn get_all_typed_from_source_chain<R: TryFrom<Entry>>(
    let mut typeds = Vec::new();
    for record in records {
       let typed: R = get_typed_from_record(record.clone())?;
-      let Action::Create(create) = record.action() else {
+      let ActionData::Create(_create) = &record.action().data else {
          panic!("Should be a create Action")
       };
-      typeds.push((record.action_address().to_owned(), create.clone(), typed))
+      typeds.push((
+         record.action_address().to_owned(),
+         record.action().to_owned(),
+         typed,
+      ))
    }
    /// Done
    Ok(typeds)
