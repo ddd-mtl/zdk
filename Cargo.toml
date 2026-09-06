@@ -37,7 +37,7 @@ hdk = { version = "=0.7.0", default-features = false }
 holo_hash = { version = "0.7.0", features = ["encoding", "serialization"], default-features = false }
 #holochain = { version = "=0.6.0-rc.0", features = ["test_utils"] }
 
-hc_zome_profiles_integrity = { git = "https://github.com/holochain-open-dev/profiles", tag = "v0.700.0" }
+hc_zome_profiles_integrity = { git = "https://github.com/holochain-open-dev/profiles", tag = "v0.701.0" }
 
 
 [profile.dev]
